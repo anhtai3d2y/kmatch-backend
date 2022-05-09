@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+    kmatch-backend:
+        build:
+            context: ./
+            target: development
+        env_file:
+            - .env
+        volumes:
+            - ./:/usr/src/app
+        ports:
+            - 3000:3000
+            - 9229:9229
+        restart: always
+        depends_on:
+            - mongo
+    mongo:
+        image: mongo
+        ports:
+            - 27017:27017
+        volumes:
+            - MongoKmatchDB:/data/db
+            - MongoKmatchBackup:/opt/backup
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=root
+        restart: always
+volumes:
+    MongoKmatchDB:
+    MongoKmatchBackup:

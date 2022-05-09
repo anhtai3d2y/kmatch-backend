@@ -29,10 +29,19 @@
 ## Installation
 
 ```bash
+$ cp dev.env .env
+```
+
+```bash
 $ npm install
 ```
 
 ## Running the app
+
+```bash
+# docker compose
+$ docker-compose up -d --build
+```
 
 ```bash
 # development
