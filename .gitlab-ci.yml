@@ -1,0 +1,56 @@
+image: docker:19
+
+services:
+  - docker:dind
+
+stages:
+  - lint
+  - build-dev
+  - deploy-dev
+  - build-prod
+  - deploy-prod
+
+# eslint:
+#   stage: lint
+#   script:
+#     - eslint src/**/*.ts
+
+build-dev:
+  stage: build-dev
+  script:
+    - echo "$DEV_ENV" > .env
+  only:
+    - dev
+  tags:
+    - kmatch
+
+deploy-dev:
+  stage: deploy-dev
+  script:
+    - echo "$DEV_ENV" > .env
+  only:
+    - dev
+  tags:
+    - kmatch
+
+build-prod:
+  stage: build-prod
+  script:
+    - echo "$PROD_ENV" > .env
+  only:
+    - tags
+  except:
+    - main
+  tags:
+    - kmatch
+
+deploy-prod:
+  stage: deploy-prod
+  script:
+    - echo "$PROD_ENV" > .env
+  only:
+    - tags
+  except:
+    - main
+  tags:
+    - kmatch
