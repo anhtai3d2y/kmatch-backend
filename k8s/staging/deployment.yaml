@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kmatch-backend-dep
+  labels:
+    app: kmatch-backend
+spec:
+  selector:
+    matchLabels:
+      app: kmatch-backend
+  template:
+    metadata:
+      labels:
+        app: kmatch-backend
+    spec:
+      containers:
+        - name: kmatch-backend-app
+          image: gcr.io/vsea-318202/vsea-backoffice-backend-staging
+          imagePullPolicy: Always
+          ports:
+            - name: http-server
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: MONGODB_URI
+              value: 'mongodb+srv://anhtai3d2y:kmatch@kmatch-cluster.39to0.mongodb.net/kmatch?retryWrites=true&w=majority&authSource=admin'
+            - name: 'PORT'
+              value: '3000'
+      terminationGracePeriodSeconds: 30

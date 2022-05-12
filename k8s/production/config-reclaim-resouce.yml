@@ -1,0 +1,14 @@
+apiVersion: kubelet.config.k8s.io/v1
+kind: KubeletConfiguration
+evictionHard:
+  memory.available: "500Mi"
+  nodefs.available: "2Gi"
+  imagefs.available: "80Gi"
+evictionMinimumReclaim:
+  memory.available: "0Mi"
+  nodefs.available: "500Mi"
+  imagefs.available: "2Gi"
+
+#   nodefs.available is lấy lại tài nguyên khi tín hiệu đạt ngưỡng 2Gi
+#   số tài nguyên tối thiểu lấy lại là 500Mi cho đến khi đạt 2.5Gi
+#   tương tự với tài nguyên disk lấy lại tài nguyên cho đến khi đạt 82Gi

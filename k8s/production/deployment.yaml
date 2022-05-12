@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kmatch-backend-dep
+  namespace: production
+  labels:
+    app: kmatch-backend
+spec:
+  selector:
+    matchLabels:
+      app: kmatch-backend
+  template:
+    metadata:
+      labels:
+        app: kmatch-backend
+    spec:
+      containers:
+        - name: kmatch-backend-app
+          image: gcr.io/vsea-318202/vsea-backoffice-backend-production
+          imagePullPolicy: Always
+          ports:
+            - name: http-server
+              containerPort: 80
+      # volumes:
+      #   - name: config
+      #     configMap:
+      #       name: backoffice-api-config  
+      terminationGracePeriodSeconds: 30
