@@ -1,0 +1,12 @@
+       
+  gcloud config set project vsea-318202
+  
+  gcloud auth login  ##or 
+
+  gcloud auth activate-service-account ACCOUNT --key-file=KEY-FILE
+
+  gcloud auth configure-docker
+    
+  gcloud config set compute/zone asia-southeast1-a
+  
+  gcloud container clusters create kmatch-cluster --num-nodes=1 --region --zone

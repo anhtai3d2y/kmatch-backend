@@ -1,0 +1,20 @@
+       
+  gcloud config set project vsea-318202
+  
+  gcloud auth login  ##or 
+
+  gcloud auth activate-service-account ACCOUNT --key-file=key.json
+
+  gcloud auth configure-docker
+    
+  gcloud config set compute/zone asia-southeast1-a
+  
+  gcloud container clusters create kmatch-cluster --num-nodes=1 --region --zone
+
+  kubectl create namespace staging
+
+  kubectl apply -f deployment.yaml --namespace=staging
+
+  kubectl apply -f service.yaml --namespace=staging
+
+  kubectl apply -f ingress.yaml --namespace=staging
