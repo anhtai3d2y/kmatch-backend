@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kmatch-backend-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: bo-backend-dev-ip
+  labels:
+    app: kmatch-backend-service
+spec:
+  backend:
+    serviceName: kmatch-backend-service
+    servicePort: 80
