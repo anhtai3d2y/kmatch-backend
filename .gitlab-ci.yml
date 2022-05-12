@@ -51,7 +51,3 @@ deploy-prod:
   - main
   tags:
   - kmatch
-sast:
-  stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
