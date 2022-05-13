@@ -14,7 +14,7 @@ RUN npm install --silent
 
 COPY . .
 
-RUN npm test
+# RUN npm test
 
 RUN npm run-script build
 
