@@ -31,11 +31,26 @@ export class UserService {
   }
 
   async getAllOrSearchUser(search: string): Promise<User | any> {
-    return await this.userModel.find();
+    const users = await this.userModel.aggregate([
+      {
+        $project: {
+          password: 0,
+          currentHashedRefreshToken: 0,
+        },
+      },
+    ]);
+    return users;
   }
 
-  async createUser(user: any) {
-    await this.userModel.create(user);
+  async createUser(payload: any) {
+    const salt = await Bcrypt.genSalt(10);
+    const password = await Bcrypt.hash(payload.password, salt);
+    const user = await this.userModel.create({
+      ...payload,
+      password,
+    });
+    user.password = null;
+    return user;
   }
 
   // Find user details with email id

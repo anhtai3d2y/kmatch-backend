@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpStatus,
   Post,
   Request,
   UploadedFile,
@@ -15,6 +16,7 @@ import { Gender } from '../../utils/constants/enum/gender.enum';
 import { RegistrationRequestDto } from './interfaces/signup.interface';
 import { AddUserDto } from '../users/dto/addUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { MessageErrorService } from 'src/message-error/message-error';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -23,6 +25,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly messageError: MessageErrorService,
   ) {}
 
   @ApiOperation({ summary: 'Add new student' })
@@ -37,14 +40,16 @@ export class AuthController {
   async createUser(
     @UploadedFile() file: Express.Multer.File,
     @Body() user: AddUserDto,
-  ): Promise<any> {
-    console.log('file: ', file);
-    console.log('user: ', user);
+  ): Promise<Response> {
     try {
-      return await this.userService.createUser(user);
-    } catch (error) {
-      return error;
+      const data: any = await this.userService.createUser(user);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Create successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
     }
-    return user;
   }
 }
