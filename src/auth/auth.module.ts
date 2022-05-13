@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { ConfigService } from '@nestjs/config';
 import { JwtRefreshTokenStrategy } from './strategy/jwtrefreshtoken.stragtegy';
 import { MessageErrorModule } from 'src/message-error/message-error.module';
+import { SendMailModule } from 'src/shared/send-mail/send-mail.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MessageErrorModule } from 'src/message-error/message-error.module';
     }),
     UserModule,
     MessageErrorModule,
+    SendMailModule,
   ],
   providers: [
     AuthService,

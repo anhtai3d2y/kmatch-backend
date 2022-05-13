@@ -9,9 +9,16 @@ import {
   UseInterceptors,
   UseGuards,
   Req,
+  Put,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiConsumes, ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiTags,
+  ApiBody,
+  ApiOperation,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserService } from '../users/user.service';
 import { Response } from '../../utils/response';
@@ -22,6 +29,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MessageErrorService } from 'src/message-error/message-error';
 import { LoginRequestDto } from './interfaces/login.interface';
 import JwtRefreshGuard from './guard/jwtRefresh.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
+import { ChangePassDto } from 'src/shared/send-mail/dto/change-pass.dto';
+import { ForgotPassDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
+import { ResetPassDto } from 'src/shared/send-mail/dto/reset-pass.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -91,7 +103,7 @@ export class AuthController {
     }
   }
 
-  @ApiOperation({ summary: 'Add new student' })
+  @ApiOperation({ summary: 'Add new user' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     type: AddUserDto,
@@ -109,6 +121,74 @@ export class AuthController {
       return {
         statusCode: HttpStatus.OK,
         message: 'Create successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  //send mail varificatin
+  @ApiOperation({ summary: 'send code Verification password retrieval' })
+  @ApiBody({
+    type: ForgotPassDto,
+    required: true,
+    description: 'send code Verification password retrieval',
+  })
+  @Post('/forgetPass')
+  async sendCodeVerification(@Body() forgetpass: ForgotPassDto) {
+    try {
+      const data = await this.authService.sendCodeVerification(forgetpass);
+      return {
+        statusCode: HttpStatus.OK,
+        message:
+          'Send mail successfully, please check your email to enter the confirmation code',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  //reset pass
+  @ApiOperation({ summary: 'resset password' })
+  @ApiBody({
+    type: ResetPassDto,
+    required: true,
+    description: 'reset password',
+  })
+  @Put('/resetpassword')
+  async resetPassword(@Body() resetPass: ResetPassDto) {
+    try {
+      const data = await this.authService.resetPassword(resetPass);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'reset password successfullys',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'change password' })
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBody({
+    type: ChangePassDto,
+    required: true,
+    description: 'change password',
+  })
+  @Put()
+  async changePass(@Request() req, @Body() changePass: ChangePassDto) {
+    try {
+      const data = await this.authService.changePass(
+        req.user.email,
+        changePass,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'change password successfullys',
         data: data,
       };
     } catch (e) {
