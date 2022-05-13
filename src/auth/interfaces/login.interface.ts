@@ -24,7 +24,7 @@ export class LoginRequestDto {
   @MaxLength(30, { message: 'Password is too long. only 30 chars allow.' })
   @ApiProperty({
     type: String,
-    example: 'QKf812=!#$@LFAakf9',
+    example: 'anhtai3d2y',
     description: 'Your password',
   })
   password: string;

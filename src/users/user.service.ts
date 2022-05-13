@@ -21,6 +21,21 @@ export class UserService {
     private pagingService: PagingService,
   ) {}
 
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: string) {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    } else {
+      throw new UnauthorizedException();
+    }
+  }
+
   async getById(id: string) {
     const user = await this.userModel.findOne({ _id: id });
     if (user) {
@@ -61,8 +76,8 @@ export class UserService {
     );
   }
 
-  async updateUser(id: any, userInfo: UpdateUserDto): Promise<User> {
-    if (!ObjectID.isValid(id)) {
+  async updateUser(userInfo: UpdateUserDto): Promise<User> {
+    if (!ObjectID.isValid(userInfo.id)) {
       throw new HttpException(
         {
           error: 'ID_NOT_VALID',
@@ -73,7 +88,7 @@ export class UserService {
       );
     }
 
-    const updatedata: any = await this.userModel.findById(id);
+    const updatedata: any = await this.userModel.findById(userInfo.id);
     if (!updatedata) {
       throw new HttpException(
         {
@@ -107,15 +122,12 @@ export class UserService {
     if (userInfo.phone) {
       updatedata.phone = userInfo.phone;
     }
-    if (userInfo.role === Role.GeneralManager) {
-      updatedata.branchId = [];
-    }
     if (userInfo.gender) {
       updatedata.gender = userInfo.gender;
     }
 
     try {
-      return await this.userModel.findByIdAndUpdate(id, updatedata, {
+      return await this.userModel.findByIdAndUpdate(userInfo.id, updatedata, {
         new: true,
       });
     } catch (e) {
@@ -139,5 +151,11 @@ export class UserService {
         );
       }
     }
+  }
+  async setCurrentRefreshToken(refreshToken: string, userId: string) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userModel.findByIdAndUpdate(userId, {
+      currentHashedRefreshToken,
+    });
   }
 }

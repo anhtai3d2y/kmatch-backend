@@ -28,6 +28,9 @@ import {
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { FilterUserDto } from './dto/filterUserdto';
 import { MessageErrorService } from 'src/message-error/message-error';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('user')
 @Controller('user')
@@ -72,59 +75,32 @@ export class UserController {
 
   // @Post()
   @Put(':id')
-  // @Permission(ActionEnum.updateAdminUser)
-  @ApiOperation({ summary: 'update user' })
-  // @UseInterceptors(
-  //   GCloudStorageFileInterceptor('image', multerConfigOptions, {
-  //     prefix: 'avatar/admin',
-  //   }),
-  // )
+  @ApiOperation({ summary: 'Update user' })
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: {
-          type: 'string',
-        },
-        email: {
-          type: 'string',
-        },
-        password: {
-          type: 'string',
-        },
-        phone: {
-          type: 'string',
-        },
-        position: {
-          type: 'string',
-        },
-        role: {
-          type: 'string',
-          // enum: AdminRole,
-        },
-        image: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
+    type: UpdateUserDto,
+    required: true,
+    description: 'Update user',
   })
   async updateUser(
-    @Param('id') id,
+    @UploadedFile() file: Express.Multer.File,
     @Body() payload: UpdateUserDto,
     // @UploadedFile()
     // file: UploadedFileMetadata,
   ): Promise<Response> {
+    console.log('payload: ', payload);
     try {
-      // const result = await this.userService.updateUser(
-      //   id,
-      //   file?.storageUrl ? payload_image : payload,
-      // );
+      const result = await this.userService.updateUser(
+        payload,
+        // file?.storageUrl ? payload_image : payload,
+      );
       return {
         statusCode: HttpStatus.OK,
         message: 'asasdasd',
-        data: [],
+        data: result,
       };
     } catch (e) {
       return e;
