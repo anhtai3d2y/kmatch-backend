@@ -24,10 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException();
     }
-    const per = await this.groupPermissionService.getPermissionsByRoleV2(
-      user.role,
-    );
-    user.permission = per;
+    // const per = await this.groupPermissionService.getPermissionsByRoleV2(
+    //   user.role,
+    // );
+    user.permission = [];
     return user;
   }
 }

@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../users/user.service';
 import { Model } from 'mongoose';
 import { User } from 'src/users/interfaces/user.interfaces';
+import * as Bcrypt from 'bcryptjs';
+import { LoginRequestDto } from './interfaces/login.interface';
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,7 +15,79 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async createUser(email: string) {
-    // return await this.userModel.create();
+  async getJwtAccessToken(payload: any) {
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+      )}`,
+    });
+    return accessToken;
+  }
+
+  async getJwtRefreshToken(payload: any) {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: `${this.configService.get(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+      )}`,
+    });
+    return refreshToken;
+  }
+
+  async login(payload: LoginRequestDto) {
+    const user = await this.userService.findOne(payload.email);
+    if (user) {
+      const passwordCheck = await Bcrypt.compare(
+        payload.password,
+        user.password,
+      );
+      if (passwordCheck) {
+        const payloadAccess = {
+          email: user.email,
+          userId: user._id,
+          name: user.name,
+          role: user.role,
+          type: 'accessToken',
+        };
+        const payloadRefresh = {
+          email: user.email,
+          userId: user._id,
+          name: user.name,
+          role: user.role,
+          type: 'refreshToken',
+        };
+
+        const accessToken = await this.getJwtAccessToken(payloadAccess);
+        const refreshToken = await this.getJwtRefreshToken(payloadRefresh);
+
+        await this.userService.setCurrentRefreshToken(refreshToken, user._id);
+
+        user.password = null;
+        return {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          data: user,
+        };
+      } else {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.UNAUTHORIZED,
+            message: 'common.WRONG_PASSWORD',
+            error: 'ValidatorError',
+          },
+          400,
+        );
+      }
+    } else {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: 'common.WRONG_EMAIL',
+          error: 'ValidatorError',
+        },
+        400,
+      );
+    }
   }
 }

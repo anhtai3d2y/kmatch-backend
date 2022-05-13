@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/user.module';
 import { UserController } from './users/user.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HeaderMiddleware } from 'common/middlewares/headers.middleware';
 
 @Module({
   imports: [
@@ -27,4 +28,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [AppController, UserController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply()
+      .forRoutes({ path: '*', method: RequestMethod.ALL })
+      .apply(HeaderMiddleware)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/signup', method: RequestMethod.POST },
+        { path: 'auth/refresh', method: RequestMethod.POST },
+      )
+      .forRoutes({ path: 'user', method: RequestMethod.ALL });
+  }
+}
