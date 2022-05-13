@@ -12,6 +12,14 @@ import {
 import { Gender } from 'utils/constants/enum/gender.enum';
 
 export class UpdateUserDto {
+  @ApiProperty({
+    type: String,
+    example: '627dd7d36f82e349327bf1a1',
+    description: 'Your id',
+    required: true,
+  })
+  id: string;
+
   @IsOptional()
   @ApiProperty({
     type: String,
@@ -66,7 +74,7 @@ export class UpdateUserDto {
   @IsMobilePhone('vi-VN')
   phone: string;
 
-  image?: string;
+  avatar?: string;
 
   permission?: string[];
 }

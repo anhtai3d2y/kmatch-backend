@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 // import { UserService } from '../../users/user.service';
 import TokenPayload from '../interfaces/tokenPayload.interface';
+import { UserService } from 'src/users/user.service';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(
@@ -13,8 +14,8 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
 ) {
   constructor(
     protected readonly configService: ConfigService,
-  ) // private readonly userService: UserService,
-  {
+    private readonly userService: UserService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
@@ -31,9 +32,9 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
     if (!refreshToken || !payload?.userId) {
       throw new UnauthorizedException();
     }
-    // return await this.userService.getUserIfRefreshTokenMatches(
-    //   refreshToken,
-    //   payload?.userId,
-    // );
+    return await this.userService.getUserIfRefreshTokenMatches(
+      refreshToken,
+      payload?.userId,
+    );
   }
 }
