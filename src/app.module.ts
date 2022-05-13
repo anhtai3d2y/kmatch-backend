@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './users/user.module';
+import { UserController } from './users/user.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -18,8 +21,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         useUnifiedTopology: true,
       }),
     }),
+    AuthModule,
+    UserModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UserController],
   providers: [AppService],
 })
 export class AppModule {}

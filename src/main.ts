@@ -1,21 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn']
+        : ['debug', 'error', 'log', 'verbose', 'warn'],
+  });
   const config = new DocumentBuilder()
     .setTitle('Kmatch backend')
     .setDescription('The kmatch API ')
     .setVersion('1.0')
     .addTag('hello world')
     .addTag('auth')
-    .addTag('adminUser')
-    .addTag('role')
-    .addTag('permission')
+    .addTag('user')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
