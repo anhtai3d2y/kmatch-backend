@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 // import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
 import { ConfigService } from '@nestjs/config';
 import { JwtRefreshTokenStrategy } from './strategy/jwtrefreshtoken.stragtegy';
+import { MessageErrorModule } from 'src/message-error/message-error.module';
 
 @Module({
   imports: [
@@ -22,8 +23,14 @@ import { JwtRefreshTokenStrategy } from './strategy/jwtrefreshtoken.stragtegy';
       inject: [ConfigService],
     }),
     UserModule,
+    MessageErrorModule,
   ],
-  providers: [AuthService, JwtStrategy, JwtRefreshTokenStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JwtRefreshTokenStrategy,
+    MessageErrorModule,
+  ],
   exports: [AuthService],
   controllers: [AuthController],
 })
