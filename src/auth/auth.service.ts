@@ -6,12 +6,16 @@ import { Model } from 'mongoose';
 import { User } from 'src/users/interfaces/user.interfaces';
 import * as Bcrypt from 'bcryptjs';
 import { LoginRequestDto } from './interfaces/login.interface';
+import { ChangePassDto } from 'src/shared/send-mail/dto/change-pass.dto';
+import { SendMailService } from 'src/shared/send-mail/send-mail.service';
+import { ForgotPassDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
+import { ResetPassDto } from 'src/shared/send-mail/dto/reset-pass.dto';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    // private readonly sendEmail: SendMailService,
+    private readonly sendEmail: SendMailService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -89,5 +93,20 @@ export class AuthService {
         400,
       );
     }
+  }
+
+  async sendCodeVerification(forgotPass: ForgotPassDto) {
+    const data = await this.userService.findOne(forgotPass.email);
+    return await this.sendEmail.sendCodeVerification(data);
+  }
+
+  async resetPassword(resetPass: ResetPassDto) {
+    const data = await this.userService.findOne(resetPass.email);
+    return await this.sendEmail.resetPass(data, resetPass);
+  }
+
+  async changePass(email, changePass: ChangePassDto) {
+    const data = await this.userService.findOne(email);
+    return await this.sendEmail.changePass(data, changePass);
   }
 }
