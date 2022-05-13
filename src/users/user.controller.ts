@@ -63,7 +63,7 @@ export class UserController {
       } else if (e.response?.error === 'Conflict') {
         messageError = message;
       } else {
-        messageError = 'common.SYSTEM_ERROR';
+        messageError = 'A system error has occurred!';
       }
       return {
         success: false,
@@ -91,7 +91,6 @@ export class UserController {
     // @UploadedFile()
     // file: UploadedFileMetadata,
   ): Promise<Response> {
-    console.log('payload: ', payload);
     try {
       const result = await this.userService.updateUser(
         payload,

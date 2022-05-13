@@ -73,7 +73,7 @@ export class AuthService {
         throw new HttpException(
           {
             statusCode: HttpStatus.UNAUTHORIZED,
-            message: 'common.WRONG_PASSWORD',
+            message: 'Wrong Password. Please try again!',
             error: 'ValidatorError',
           },
           400,
@@ -83,7 +83,7 @@ export class AuthService {
       throw new HttpException(
         {
           statusCode: HttpStatus.UNAUTHORIZED,
-          message: 'common.WRONG_EMAIL',
+          message: 'Login email not found. Please register!',
           error: 'ValidatorError',
         },
         400,

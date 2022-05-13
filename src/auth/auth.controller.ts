@@ -71,7 +71,6 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() payload: LoginRequestDto): Promise<Response> {
-    console.log('payload: ', payload);
     try {
       const result = await this.authService.login(payload);
       return {
@@ -79,8 +78,17 @@ export class AuthController {
         message: 'Login successfully!',
         data: result,
       };
-    } catch (error) {}
-    return;
+    } catch (e) {
+      const message = e.message || 'A system error has occurred!';
+      const statusCode = e.statusCode || HttpStatus.UNPROCESSABLE_ENTITY;
+      const error = e.error || 'Unprocessable Entity';
+
+      return {
+        statusCode: statusCode,
+        message: message,
+        error: error,
+      };
+    }
   }
 
   @ApiOperation({ summary: 'Add new student' })
