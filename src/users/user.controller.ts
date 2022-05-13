@@ -15,6 +15,7 @@ import {
   UploadedFile,
   Request,
   Post,
+  HttpException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -26,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { FilterUserDto } from './dto/filterUserdto';
+import { MessageErrorService } from 'src/message-error/message-error';
 
 @ApiTags('user')
 @Controller('user')
@@ -40,14 +42,31 @@ export class UserController {
   async getAllOrSearchUser(
     @Request() req,
     @Query() search: FilterUserDto,
-  ): Promise<any> {
-    console.log(search);
+  ): Promise<Response> {
     try {
       const data: any = await this.userService.getAllOrSearchUser(
         search.textSearch,
       );
-    } catch (error) {
-      return error;
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get successfully',
+        data: data,
+      };
+    } catch (e) {
+      const message = e.response?.message;
+      let messageError: any = message;
+      if (e.response?.error === 'ID_NOT_FOUND') {
+        messageError = message;
+      } else if (e.response?.error === 'Conflict') {
+        messageError = message;
+      } else {
+        messageError = 'common.SYSTEM_ERROR';
+      }
+      return {
+        success: false,
+        message: messageError,
+        error: 'Unprocessable Entity',
+      };
     }
   }
 
