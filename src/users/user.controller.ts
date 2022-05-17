@@ -41,7 +41,9 @@ export class UserController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'get user' })
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user' })
   async getAllOrSearchUser(
     @Request() req,
     @Query() search: FilterUserDto,

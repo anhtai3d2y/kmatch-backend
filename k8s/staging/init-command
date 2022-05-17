@@ -13,8 +13,8 @@
 
   kubectl create namespace staging
 
-  kubectl apply -f deployment.yaml --namespace=staging
+  kubectl --kubeconfig=kmatch-cluster.yaml apply -f deployment.yaml --namespace=kmatch-staging
 
-  kubectl apply -f service.yaml --namespace=staging
+  kubectl --kubeconfig=kmatch-cluster.yaml apply -f service.yaml --namespace=kmatch-staging
 
-  kubectl apply -f ingress.yaml --namespace=staging
+  kubectl --kubeconfig=kmatch-cluster.yaml apply -f ingress.yaml --namespace=kmatch-staging

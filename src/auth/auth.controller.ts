@@ -45,7 +45,7 @@ export class AuthController {
     private readonly messageError: MessageErrorService,
   ) {}
 
-  @ApiOperation({ summary: 'refresh Token' })
+  @ApiOperation({ summary: 'Refresh Token' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -129,11 +129,11 @@ export class AuthController {
   }
 
   //send mail varificatin
-  @ApiOperation({ summary: 'send code Verification password retrieval' })
+  @ApiOperation({ summary: 'Send code Verification password retrieval' })
   @ApiBody({
     type: ForgotPassDto,
     required: true,
-    description: 'send code Verification password retrieval',
+    description: 'Send code Verification password retrieval',
   })
   @Post('/forgetPass')
   async sendCodeVerification(@Body() forgetpass: ForgotPassDto) {
@@ -151,11 +151,11 @@ export class AuthController {
   }
 
   //reset pass
-  @ApiOperation({ summary: 'resset password' })
+  @ApiOperation({ summary: 'Reset password' })
   @ApiBody({
     type: ResetPassDto,
     required: true,
-    description: 'reset password',
+    description: 'Reset password',
   })
   @Put('/resetpassword')
   async resetPassword(@Body() resetPass: ResetPassDto) {
@@ -172,12 +172,12 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'change password' })
+  @ApiOperation({ summary: 'Change password' })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBody({
     type: ChangePassDto,
     required: true,
-    description: 'change password',
+    description: 'Change password',
   })
   @Put()
   async changePass(@Request() req, @Body() changePass: ChangePassDto) {
