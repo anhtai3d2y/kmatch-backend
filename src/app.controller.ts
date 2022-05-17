@@ -8,8 +8,4 @@ export class AppController {
   redirect(@Res() res): Promise<any> {
     return res.redirect('/api');
   }
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
 }
