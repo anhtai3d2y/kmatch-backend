@@ -13,6 +13,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { uuid } from '../../utils/util';
+import * as fs from 'fs';
+import { deleteFile, uploadFile } from 'utils/cloudinary';
 
 export class UserService {
   constructor(
@@ -57,12 +60,22 @@ export class UserService {
     return users;
   }
 
-  async createUser(payload: any) {
+  async createUser(payload: any, file: any) {
+    const fileName = `./images/${uuid()}.png`;
+    fs.createWriteStream(fileName).write(file.buffer);
+    const fileUploaded = await uploadFile(fileName);
+    fs.unlink(fileName, (err) => {
+      if (err) console.log(err);
+    });
     const salt = await Bcrypt.genSalt(10);
     const password = await Bcrypt.hash(payload.password, salt);
     const user = await this.userModel.create({
       ...payload,
       password,
+      avatar: {
+        publicId: fileUploaded.public_id,
+        secureURL: fileUploaded.secure_url,
+      },
     });
     user.password = null;
     return user;
@@ -76,7 +89,7 @@ export class UserService {
     );
   }
 
-  async updateUser(userInfo: UpdateUserDto): Promise<User> {
+  async updateUser(userInfo: UpdateUserDto, file): Promise<User> {
     if (!ObjectID.isValid(userInfo.id)) {
       throw new HttpException(
         {
@@ -103,12 +116,7 @@ export class UserService {
     if (userInfo.name) {
       updatedata.name = userInfo.name;
     }
-    // if (userInfo?.image) {
-    //   if (updatedata?.image) {
-    //     await this.gCloudStorageService.deleteFile(updatedata.image);
-    //   }
-    //   updatedata.image = userInfo.image;
-    // }
+
     if (userInfo.email) {
       updatedata.email = userInfo.email;
     }
@@ -119,17 +127,34 @@ export class UserService {
     if (userInfo.role) {
       updatedata.role = userInfo.role;
     }
-    if (userInfo.phone) {
-      updatedata.phone = userInfo.phone;
+    if (userInfo.phonenumber) {
+      updatedata.phonenumber = userInfo.phonenumber;
     }
     if (userInfo.gender) {
       updatedata.gender = userInfo.gender;
     }
+    if (file) {
+      if (updatedata.avatar.publicId) {
+        await deleteFile(updatedata.avatar.publicId);
+      }
+      const fileName = `./images/${uuid()}.png`;
+      fs.createWriteStream(fileName).write(file.buffer);
+      const fileUploaded = await uploadFile(fileName);
+      fs.unlink(fileName, (err) => {
+        if (err) console.log(err);
+      });
+      updatedata.avatar = {
+        publicId: fileUploaded.public_id,
+        secureURL: fileUploaded.secure_url,
+      };
+    }
 
     try {
-      return await this.userModel.findByIdAndUpdate(userInfo.id, updatedata, {
-        new: true,
-      });
+      const data = await this.userModel.findByIdAndUpdate(
+        userInfo.id,
+        updatedata,
+      );
+      return data;
     } catch (e) {
       if (e.name === 'MongoError') {
         throw new HttpException(

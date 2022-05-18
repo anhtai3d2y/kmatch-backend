@@ -34,7 +34,6 @@ import { RolesGuard } from 'common/guard/roles.guard';
 import { ChangePassDto } from 'src/shared/send-mail/dto/change-pass.dto';
 import { ForgotPassDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
 import { ResetPassDto } from 'src/shared/send-mail/dto/reset-pass.dto';
-
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -117,23 +116,24 @@ export class AuthController {
     @Body() user: AddUserDto,
   ): Promise<Response> {
     try {
-      const data: any = await this.userService.createUser(user);
+      const data: any = await this.userService.createUser(user, file);
       return {
         statusCode: HttpStatus.OK,
         message: 'Create successfully',
         data: data,
       };
     } catch (e) {
+      console.log(e);
       return this.messageError.messageErrorController(e);
     }
   }
 
   //send mail varificatin
-  @ApiOperation({ summary: 'Send code Verification password retrieval' })
+  @ApiOperation({ summary: 'Send code verification password retrieval' })
   @ApiBody({
     type: ForgotPassDto,
     required: true,
-    description: 'Send code Verification password retrieval',
+    description: 'Send code verification password retrieval',
   })
   @Post('/forgetPass')
   async sendCodeVerification(@Body() forgetpass: ForgotPassDto) {

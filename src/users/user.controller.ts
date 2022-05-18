@@ -90,17 +90,12 @@ export class UserController {
   async updateUser(
     @UploadedFile() file: Express.Multer.File,
     @Body() payload: UpdateUserDto,
-    // @UploadedFile()
-    // file: UploadedFileMetadata,
   ): Promise<Response> {
     try {
-      const result = await this.userService.updateUser(
-        payload,
-        // file?.storageUrl ? payload_image : payload,
-      );
+      const result = await this.userService.updateUser(payload, file);
       return {
         statusCode: HttpStatus.OK,
-        message: 'asasdasd',
+        message: 'Update user successfully!',
         data: result,
       };
     } catch (e) {
