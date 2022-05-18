@@ -45,7 +45,7 @@ export class UpdateUserDto {
   @MaxLength(30, { message: '30' })
   @ApiProperty({
     type: String,
-    example: '123456',
+    example: 'anhtai3d2y',
     description: 'Your password',
   })
   password: string;
@@ -72,8 +72,15 @@ export class UpdateUserDto {
     description: 'Your Phone',
   })
   @IsMobilePhone('vi-VN')
-  phone: string;
+  phonenumber: string;
 
+  @ApiProperty({
+    type: String,
+    format: 'binary',
+    description: 'avatar',
+    required: false,
+  })
+  @IsOptional()
   avatar?: string;
 
   permission?: string[];
