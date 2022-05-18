@@ -32,8 +32,8 @@ import JwtRefreshGuard from './guard/jwtRefresh.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
 import { ChangePassDto } from 'src/shared/send-mail/dto/change-pass.dto';
-import { ForgotPassDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
-import { ResetPassDto } from 'src/shared/send-mail/dto/reset-pass.dto';
+import { ForgotPasswordDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
+import { ResetPasswordDto } from 'src/shared/send-mail/dto/reset-pass.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -131,14 +131,14 @@ export class AuthController {
   //send mail varificatin
   @ApiOperation({ summary: 'Send code verification password retrieval' })
   @ApiBody({
-    type: ForgotPassDto,
+    type: ForgotPasswordDto,
     required: true,
     description: 'Send code verification password retrieval',
   })
-  @Post('/forgetPass')
-  async sendCodeVerification(@Body() forgetpass: ForgotPassDto) {
+  @Post('/forgetpassword')
+  async sendCodeVerification(@Body() forgetpassword: ForgotPasswordDto) {
     try {
-      const data = await this.authService.sendCodeVerification(forgetpass);
+      const data = await this.authService.sendCodeVerification(forgetpassword);
       return {
         statusCode: HttpStatus.OK,
         message:
@@ -153,14 +153,14 @@ export class AuthController {
   //reset pass
   @ApiOperation({ summary: 'Reset password' })
   @ApiBody({
-    type: ResetPassDto,
+    type: ResetPasswordDto,
     required: true,
     description: 'Reset password',
   })
   @Put('/resetpassword')
-  async resetPassword(@Body() resetPass: ResetPassDto) {
+  async resetPassword(@Body() resetPassword: ResetPasswordDto) {
     try {
-      const data = await this.authService.resetPassword(resetPass);
+      const data = await this.authService.resetPassword(resetPassword);
       return {
         statusCode: HttpStatus.OK,
         message: 'reset password successfullys',
