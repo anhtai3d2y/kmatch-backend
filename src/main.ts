@@ -17,7 +17,6 @@ async function bootstrap() {
     .setTitle('Kmatch backend')
     .setDescription('The kmatch API ')
     .setVersion('1.0')
-    .addTag('hello world')
     .addTag('auth')
     .addTag('user')
     .addBearerAuth()
@@ -26,6 +25,5 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   const port = process.env.PORT;
   await app.listen(port);
-  console.log(`Application listening on port ${port}`);
 }
 bootstrap();

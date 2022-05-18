@@ -4,8 +4,8 @@ export interface User extends Document {
   email: string;
   password: string;
   role: string;
-  image: string;
-  phone: string;
+  avatar: string;
+  phonenumber: string;
   permission: string[];
   currentHashedRefreshToken: string;
   verification: {
