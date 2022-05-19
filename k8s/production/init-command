@@ -1,5 +1,5 @@
        
-  gcloud config set project vsea-318202
+  gcloud config set project bamboo-archery-350015
   
   gcloud auth login  ##or 
 

@@ -8,8 +8,8 @@ import * as Bcrypt from 'bcryptjs';
 import { LoginRequestDto } from './interfaces/login.interface';
 import { ChangePassDto } from 'src/shared/send-mail/dto/change-pass.dto';
 import { SendMailService } from 'src/shared/send-mail/send-mail.service';
-import { ForgotPassDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
-import { ResetPassDto } from 'src/shared/send-mail/dto/reset-pass.dto';
+import { ForgotPasswordDto } from 'src/shared/send-mail/dto/fogot-pass.dto';
+import { ResetPasswordDto } from 'src/shared/send-mail/dto/reset-pass.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -95,14 +95,14 @@ export class AuthService {
     }
   }
 
-  async sendCodeVerification(forgotPass: ForgotPassDto) {
-    const data = await this.userService.findOne(forgotPass.email);
+  async sendCodeVerification(forgotPassword: ForgotPasswordDto) {
+    const data = await this.userService.findOne(forgotPassword.email);
     return await this.sendEmail.sendCodeVerification(data);
   }
 
-  async resetPassword(resetPass: ResetPassDto) {
-    const data = await this.userService.findOne(resetPass.email);
-    return await this.sendEmail.resetPass(data, resetPass);
+  async resetPassword(resetPassword: ResetPasswordDto) {
+    const data = await this.userService.findOne(resetPassword.email);
+    return await this.sendEmail.resetPass(data, resetPassword);
   }
 
   async changePass(email, changePass: ChangePassDto) {

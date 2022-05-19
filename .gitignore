@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # Evirontment
 .env
+
+# Key
+key.json
