@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: kmatch-backend-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: bo-backend-dev-ip
+    kubernetes.io/ingress.global-static-ip-name: kmatch-backend-dev-ip
   labels:
     app: kmatch-backend-service
 spec:

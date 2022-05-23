@@ -6,6 +6,8 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 ENV CHROMIUM_PATH /usr/bin/chromium-browser
 
+ENV GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/key.json
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
