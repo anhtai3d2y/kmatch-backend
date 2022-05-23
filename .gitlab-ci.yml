@@ -1,47 +1,76 @@
 
 image: docker:19
+
 services:
-- docker:dind
+  - docker:dind
+
 stages:
-- lint
-- build-dev
-- deploy-dev
-- build-prod
-- deploy-prod
-- test
+  - lint
+  - build-dev
+  - deploy-dev
+  - build-prod
+  - deploy-prod
+  - test
+
 build-dev:
   stage: build-dev
   script:
-  - echo "$DEV_ENV" > .env
+    - echo "$GOOGLE_KEY" > key.json
+    - echo "$DEV_ENV" > .env
+    - docker build --no-cache -f Prod.Dockerfile -t "$CI_JOB_NAME_DEV:$CI_COMMIT_SHA" .
+    - docker login -u _json_key --password-stdin https://gcr.io < key.json
+    - docker push "$CI_JOB_NAME_DEV:$CI_COMMIT_SHA"
+    - docker system prune -a -f
   only:
-  - dev
+    - dev
   tags:
-  - kmatch
+    - kmatch
+
 deploy-dev:
   stage: deploy-dev
   script:
-  - echo "$DEV_ENV" > .env
+    - echo "$GOOGLE_KEY" > key.json
+    - gcloud auth activate-service-account --key-file=key.json
+    - gcloud config set project bamboo-archery-350015
+    - gcloud config set container/cluster kmatch-cluster
+    - gcloud config set compute/region asia-southeast1
+    - gcloud container clusters get-credentials kmatch-cluster --zone asia-southeast1-a
+    - kubectl config current-context
+    - kubectl set image deployment/kmatch-backend-dep kmatch-backend-app="$CI_JOB_NAME_DEV:$CI_COMMIT_SHA" -n staging
   only:
   - dev
   tags:
   - kmatch
+
 build-prod:
   stage: build-prod
   script:
-  - echo "$PROD_ENV" > .env
+    - echo "$GOOGLE_KEY" > key.json
+    - echo "$PROD_ENV" > .env
+    - docker build --no-cache -f Prod.Dockerfile -t "$CI_JOB_NAME_PROD:$CI_COMMIT_TAG" .
+    - docker login -u _json_key --password-stdin https://gcr.io < key.json
+    - docker push "$CI_JOB_NAME_PROD:$CI_COMMIT_TAG"
+    - docker system prune -a -f
   only:
-  - tags
+    - tags
   except:
-  - main
+    - main
   tags:
-  - kmatch
+    - kmatch
 deploy-prod:
   stage: deploy-prod
   script:
-  - echo "$PROD_ENV" > .env
+    - echo "$GOOGLE_KEY" > key.json
+    - gcloud auth activate-service-account --key-file=key.json
+    - gcloud config set project bamboo-archery-350015
+    - gcloud config set container/cluster kmatch-cluster
+    - gcloud config set compute/region asia-southeast1
+    - gcloud container clusters get-credentials kmatch-cluster --zone asia-southeast1-a
+    - kubectl config current-context
+    - kubectl set image deployment/kmatch-backend-dep  kmatch-backend-app="$CI_JOB_NAME_PROD:$CI_COMMIT_TAG" -n production
   only:
-  - tags
+    - tags
   except:
-  - main
+    - main
   tags:
-  - kmatch
+    - kmatch
