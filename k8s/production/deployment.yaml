@@ -16,11 +16,44 @@ spec:
     spec:
       containers:
         - name: kmatch-backend-app
-          image: gcr.io/vsea-318202/vsea-backoffice-backend-production
+          image: gcr.io/bamboo-archery-350015/kmatch-backend-production
           imagePullPolicy: Always
           ports:
             - name: http-server
               containerPort: 80
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: MONGODB_URI
+              value: 'mongodb+srv://anhtai3d2y:kmatch@kmatch-cluster.39to0.mongodb.net/kmatch?retryWrites=true&w=majority&authSource=admin'
+            - name: 'PORT'
+              value: '3000'
+            - name: JWT_ACCESS_TOKEN_SECRET
+              value: 'jwtConstants.secret'
+            - name: JWT_REFRESH_TOKEN_SECRET
+              value: 'jwtRefreshTokenConstants.secret'
+            - name: JWT_SECRET
+              value: 'jwtConstants.secret'
+            - name: JWT_ACCESS_TOKEN_EXPIRATION_TIME
+              value: '24h'
+            - name: JWT_REFRESH_TOKEN_EXPIRATION_TIME
+              value: '7d'
+            - name: EMAIL_ID
+              value: 'kmagearmanagement@gmail.com'
+            - name: EMAIL_PASS
+              value: 'Phamduytai27112k'
+            - name: EMAIL_HOST
+              value: 'smtp.gmail.com'
+            - name: EMAIL_PORT
+              value: '587'
+            - name: CLOUDINARY_CLOUD_NAME
+              value: 'anhtai3d2y'
+            - name: CLOUDINARY_API_KEY
+              value: '359976413588993'
+            - name: CLOUDINARY_API_SECRET
+              value: 'Mwzj54t_WYfKtVWfutJuaD5yYW8'
+            - name: CLOUDINARY_URL
+              value: 'cloudinary://359976413588993:Mwzj54t_WYfKtVWfutJuaD5yYW8@anhtai3d2y'
       # volumes:
       #   - name: config
       #     configMap:
