@@ -7,6 +7,17 @@ import { UserModule } from './users/user.module';
 import { UserController } from './users/user.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HeaderMiddleware } from 'common/middlewares/headers.middleware';
+import { PaypalModule } from './paypal/paypal.module';
+import { ThreadsModule } from './threads/threads.module';
+import { MessagesModule } from './messages/messages.module';
+import { InterestedGenderModule } from './interested-gender/interested-gender.module';
+import { InterestedRelationModule } from './interested-relation/interested-relation.module';
+import { PermissionModule } from './permission/permission.module';
+import { GroupPermissionModule } from './group-permission/group-permission.module';
+import { MatchesModule } from './matches/matches.module';
+import { SuperLikeModule } from './super-like/super-like.module';
+import { LikeUsersModule } from './like-users/like-users.module';
+import { DislikeUsersModule } from './dislike-users/dislike-users.module';
 
 @Module({
   imports: [
@@ -24,6 +35,17 @@ import { HeaderMiddleware } from 'common/middlewares/headers.middleware';
     }),
     AuthModule,
     UserModule,
+    PaypalModule,
+    ThreadsModule,
+    MessagesModule,
+    InterestedGenderModule,
+    InterestedRelationModule,
+    PermissionModule,
+    GroupPermissionModule,
+    MatchesModule,
+    SuperLikeModule,
+    LikeUsersModule,
+    DislikeUsersModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService],
