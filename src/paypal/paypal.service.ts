@@ -4,7 +4,7 @@ import { UpdatePaypalDto } from './dto/update-paypal.dto';
 
 @Injectable()
 export class PaypalService {
-  create(createPaypalDto: CreatePaypalDto, req, paypal, res) {
+  create(createPaypalDto: CreatePaypalDto, req, paypal) {
     var create_payment_json = {
       intent: 'sale',
       payer: {
@@ -33,12 +33,10 @@ export class PaypalService {
       } else {
         for (let i = 0; i < payment.links.length; i++) {
           if (payment.links[i].rel === 'approval_url') {
-            return res.status(200).json({
-              errCode: 0,
-              errMessage: 'Ok',
+            return {
               paymentId: payment.id,
               paypalLink: payment.links[i].href,
-            });
+            };
           }
         }
       }
