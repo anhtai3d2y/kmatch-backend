@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { DislikeUsersService } from './dislike-users.service';
 import { CreateDislikeUserDto } from './dto/create-dislike-user.dto';
@@ -31,7 +32,7 @@ export class DislikeUsersController {
     return this.dislikeUsersService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateDislikeUserDto: UpdateDislikeUserDto,

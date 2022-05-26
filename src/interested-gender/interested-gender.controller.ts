@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { InterestedGenderService } from './interested-gender.service';
 import { CreateInterestedGenderDto } from './dto/create-interested-gender.dto';
@@ -33,7 +34,7 @@ export class InterestedGenderController {
     return this.interestedGenderService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateInterestedGenderDto: UpdateInterestedGenderDto,

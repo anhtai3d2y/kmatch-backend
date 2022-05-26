@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { LikeUsersService } from './like-users.service';
 import { CreateLikeUserDto } from './dto/create-like-user.dto';
@@ -31,7 +32,7 @@ export class LikeUsersController {
     return this.likeUsersService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateLikeUserDto: UpdateLikeUserDto,

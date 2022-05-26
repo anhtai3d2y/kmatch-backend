@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { SuperLikeService } from './super-like.service';
 import { CreateSuperLikeDto } from './dto/create-super-like.dto';
@@ -31,7 +32,7 @@ export class SuperLikeController {
     return this.superLikeService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateSuperLikeDto: UpdateSuperLikeDto,
