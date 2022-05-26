@@ -11,7 +11,7 @@ import { LikeUsersService } from './like-users.service';
 import { CreateLikeUserDto } from './dto/create-like-user.dto';
 import { UpdateLikeUserDto } from './dto/update-like-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-@ApiTags('lke-users')
+@ApiTags('like-users')
 @Controller('like-users')
 export class LikeUsersController {
   constructor(private readonly likeUsersService: LikeUsersService) {}
