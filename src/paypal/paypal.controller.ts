@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Request,
 } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
@@ -24,8 +25,8 @@ export class PaypalController {
   constructor(private readonly paypalService: PaypalService) {}
 
   @Post()
-  create(@Body() createPaypalDto: CreatePaypalDto) {
-    // return this.paypalService.create(createPaypalDto);
+  create(@Request() req, @Body() createPaypalDto: CreatePaypalDto) {
+    return this.paypalService.create(createPaypalDto, req, paypal);
   }
 
   @Get('success')
