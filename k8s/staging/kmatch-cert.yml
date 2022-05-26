@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: kmatch-cert
+spec:
+  domains:
+    - kmatch.online
+    - www.kmatch.online

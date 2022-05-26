@@ -19,6 +19,16 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('auth')
     .addTag('user')
+    .addTag('group-permission')
+    .addTag('permission')
+    .addTag('interested-gender')
+    .addTag('interested-relation')
+    .addTag('like-users')
+    .addTag('dislike-users')
+    .addTag('matches')
+    .addTag('threads')
+    .addTag('messages')
+    .addTag('paypal')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
