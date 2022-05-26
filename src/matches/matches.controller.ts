@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { CreateMatchDto } from './dto/create-match.dto';
@@ -31,7 +32,7 @@ export class MatchesController {
     return this.matchesService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateMatchDto: UpdateMatchDto) {
     return this.matchesService.update(+id, updateMatchDto);
   }
