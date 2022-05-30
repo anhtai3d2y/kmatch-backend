@@ -5,23 +5,32 @@ import { UpdatePaypalDto } from './dto/update-paypal.dto';
 @Injectable()
 export class PaypalService {
   create(createPaypalDto: CreatePaypalDto, req, paypal) {
+    console.log('paypal: ', paypal);
     var create_payment_json = {
       intent: 'sale',
       payer: {
         payment_method: 'paypal',
       },
       redirect_urls: {
-        return_url: `${process.env.REACT_APP_BACKEND_URL}/api/paypal-success`,
-        cancel_url: `${process.env.REACT_APP_BACKEND_URL}/api/paypal-cancel`,
+        return_url: `${process.env.BACKEND_URL}/paypal/success`,
+        cancel_url: `${process.env.BACKEND_URL}/paypal/cancel`,
       },
       transactions: [
         {
           item_list: {
-            items: req.body.arrDetails,
+            items: [
+              {
+                name: 'Kmatch gold',
+                sku: '001',
+                price: '1.00',
+                currency: 'USD',
+                quantity: 1,
+              },
+            ],
           },
           amount: {
             currency: 'USD',
-            total: req.body.totalPrice,
+            total: '1.00',
           },
           description: 'This is the payment description.',
         },
@@ -31,6 +40,7 @@ export class PaypalService {
       if (error) {
         throw error;
       } else {
+        console.log('payment: ', payment);
         for (let i = 0; i < payment.links.length; i++) {
           if (payment.links[i].rel === 'approval_url') {
             return {
@@ -44,10 +54,10 @@ export class PaypalService {
   }
 
   paymentSuccess() {
-    return `This action returns all paypal`;
+    return '/api';
   }
 
   paymentCancel() {
-    return `This action returns all paypal`;
+    return `This is cancel payment`;
   }
 }
