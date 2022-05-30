@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Request,
+  Res,
 } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
@@ -30,8 +31,8 @@ export class PaypalController {
   }
 
   @Get('success')
-  paymentSuccess() {
-    return this.paypalService.paymentSuccess();
+  paymentSuccess(@Res() res) {
+    return res.redirect(this.paypalService.paymentSuccess());
   }
 
   @Get('cancel')
