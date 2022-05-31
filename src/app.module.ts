@@ -18,6 +18,7 @@ import { MatchesModule } from './matches/matches.module';
 import { SuperLikeModule } from './super-like/super-like.module';
 import { LikeUsersModule } from './like-users/like-users.module';
 import { DislikeUsersModule } from './dislike-users/dislike-users.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { DislikeUsersModule } from './dislike-users/dislike-users.module';
     DislikeUsersModule,
   ],
   controllers: [AppController, UserController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
