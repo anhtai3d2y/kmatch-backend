@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateDislikeUserDto } from './dto/create-dislike-user.dto';
-import { UpdateDislikeUserDto } from './dto/update-dislike-user.dto';
+import { DislikeUsers } from './interfaces/dislike-users.interfaces';
 
 @Injectable()
 export class DislikeUsersService {
-  create(createDislikeUserDto: CreateDislikeUserDto) {
-    return 'This action adds a new dislikeUser';
+  constructor(
+    @InjectModel('DislikeUsers')
+    private readonly dislikeUserModel: Model<DislikeUsers>,
+  ) {}
+  async create(createDislikeUserDto: CreateDislikeUserDto) {
+    const dislike = await this.dislikeUserModel.create(createDislikeUserDto);
+    return dislike;
   }
 
-  findAll() {
-    return `This action returns all dislikeUsers`;
+  async findAll() {
+    const dislike = await this.dislikeUserModel.find({});
+    return dislike;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} dislikeUser`;
-  }
-
-  update(id: number, updateDislikeUserDto: UpdateDislikeUserDto) {
-    return `This action updates a #${id} dislikeUser`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} dislikeUser`;
+  async findOne(id: string) {
+    const dislike = await this.dislikeUserModel.findOne({
+      _id: id,
+    });
+    return dislike;
   }
 }
