@@ -1,43 +1,49 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpStatus } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { MessageErrorService } from 'src/message-error/message-error';
+import { Response } from 'utils/response';
 @ApiTags('messages')
 @Controller('messages')
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(
+    private readonly messagesService: MessagesService,
+    private readonly messageError: MessageErrorService,
+  ) {}
 
+  @ApiOperation({ summary: 'Add new message' })
+  @ApiBody({
+    type: CreateMessageDto,
+    required: true,
+    description: 'Add new match',
+  })
   @Post()
-  create(@Body() createMessageDto: CreateMessageDto) {
-    return this.messagesService.create(createMessageDto);
+  async create(@Body() createMessageDto: CreateMessageDto): Promise<Response> {
+    try {
+      const data: any = await this.messagesService.create(createMessageDto);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Create successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 
+  @ApiOperation({ summary: 'Get messages' })
   @Get()
-  findAll() {
-    return this.messagesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messagesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(+id, updateMessageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messagesService.remove(+id);
+  async findAll(): Promise<Response> {
+    try {
+      const data: any = await this.messagesService.findAll();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 }

@@ -26,8 +26,8 @@ import { RolesGuard } from '../../common/guard/roles.guard';
 import { ActionEnum } from '../../utils/constants/enum/action.enum';
 import { Permission } from '../../common/decorators/roles.decorator';
 
-@ApiTags('permission')
 @Controller('permission')
+@ApiTags('permission')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class PermissionController {

@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
-import { UpdatePaypalDto } from './dto/update-paypal.dto';
 
 @Injectable()
 export class PaypalService {
   create(createPaypalDto: CreatePaypalDto, req, paypal) {
-    console.log('paypal: ', paypal);
     var create_payment_json = {
       intent: 'sale',
       payer: {
@@ -40,9 +38,9 @@ export class PaypalService {
       if (error) {
         throw error;
       } else {
-        console.log('payment: ', payment);
         for (let i = 0; i < payment.links.length; i++) {
           if (payment.links[i].rel === 'approval_url') {
+            console.log('payment: ', payment.id);
             return {
               paymentId: payment.id,
               paypalLink: payment.links[i].href,
