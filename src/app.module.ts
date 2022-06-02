@@ -10,15 +10,14 @@ import { HeaderMiddleware } from 'common/middlewares/headers.middleware';
 import { PaypalModule } from './paypal/paypal.module';
 import { ThreadsModule } from './threads/threads.module';
 import { MessagesModule } from './messages/messages.module';
-import { InterestedGenderModule } from './interested-gender/interested-gender.module';
-import { InterestedRelationModule } from './interested-relation/interested-relation.module';
 import { PermissionModule } from './permission/permission.module';
 import { GroupPermissionModule } from './group-permission/group-permission.module';
 import { MatchesModule } from './matches/matches.module';
-import { SuperLikeModule } from './super-like/super-like.module';
 import { LikeUsersModule } from './like-users/like-users.module';
 import { DislikeUsersModule } from './dislike-users/dislike-users.module';
 import { ChatGateway } from './chat.gateway';
+import { SuperlikeUsersModule } from './superlike-users/superlike-users.module';
+import { SuperlikeStarModule } from './superlike-star/superlike-star.module';
 
 @Module({
   imports: [
@@ -39,14 +38,13 @@ import { ChatGateway } from './chat.gateway';
     PaypalModule,
     ThreadsModule,
     MessagesModule,
-    InterestedGenderModule,
-    InterestedRelationModule,
     PermissionModule,
     GroupPermissionModule,
     MatchesModule,
-    SuperLikeModule,
     LikeUsersModule,
     DislikeUsersModule,
+    SuperlikeUsersModule,
+    SuperlikeStarModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService, ChatGateway],

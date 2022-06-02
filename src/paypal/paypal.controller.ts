@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
-import { UpdatePaypalDto } from './dto/update-paypal.dto';
 import { ApiTags } from '@nestjs/swagger';
 const paypal = require('paypal-rest-sdk');
 

@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
+import { Matches } from './interfaces/matches.interfaces';
 
 @Injectable()
 export class MatchesService {
-  create(createMatchDto: CreateMatchDto) {
-    return 'This action adds a new match';
+  constructor(
+    @InjectModel('Matches')
+    private readonly matchesModel: Model<Matches>,
+  ) {}
+  async create(createMatchDto: CreateMatchDto) {
+    const like = await this.matchesModel.create(createMatchDto);
+    return like;
   }
 
-  findAll() {
-    return `This action returns all matches`;
+  async findAll() {
+    const like = await this.matchesModel.find({});
+    return like;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} match`;
+  async findOne(id: string) {
+    const like = await this.matchesModel.findOne({
+      _id: id,
+    });
+    return like;
   }
 
-  update(id: number, updateMatchDto: UpdateMatchDto) {
-    return `This action updates a #${id} match`;
+  async update(id: string, updateMatchDto: UpdateMatchDto) {
+    return 'Update';
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} match`;
+  async remove(id: string) {
+    return 'Delete';
   }
 }

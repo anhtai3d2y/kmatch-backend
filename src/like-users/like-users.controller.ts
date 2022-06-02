@@ -1,47 +1,56 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Put,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, HttpStatus } from '@nestjs/common';
 import { LikeUsersService } from './like-users.service';
 import { CreateLikeUserDto } from './dto/create-like-user.dto';
-import { UpdateLikeUserDto } from './dto/update-like-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'utils/response';
+import { MessageErrorService } from 'src/message-error/message-error';
 @ApiTags('like-users')
 @Controller('like-users')
 export class LikeUsersController {
-  constructor(private readonly likeUsersService: LikeUsersService) {}
+  constructor(
+    private readonly likeUsersService: LikeUsersService,
+    private readonly messageError: MessageErrorService,
+  ) {}
 
+  @ApiOperation({ summary: 'Add new like' })
+  @ApiBody({
+    type: CreateLikeUserDto,
+    required: true,
+    description: 'Add new like',
+  })
   @Post()
-  create(@Body() createLikeUserDto: CreateLikeUserDto) {
-    return this.likeUsersService.create(createLikeUserDto);
+  async create(
+    @Body() createLikeUserDto: CreateLikeUserDto,
+  ): Promise<Response> {
+    try {
+      const data: any = await this.likeUsersService.create(createLikeUserDto);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Create successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 
+  @ApiOperation({ summary: 'Get likes' })
   @Get()
-  findAll() {
-    return this.likeUsersService.findAll();
+  async findAll(): Promise<Response> {
+    try {
+      const data: any = await this.likeUsersService.findAll();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.likeUsersService.findOne(+id);
-  }
-
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateLikeUserDto: UpdateLikeUserDto,
-  ) {
-    return this.likeUsersService.update(+id, updateLikeUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.likeUsersService.remove(+id);
+    return this.likeUsersService.findOne(id);
   }
 }
