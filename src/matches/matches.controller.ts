@@ -42,7 +42,7 @@ export class MatchesController {
     }
   }
 
-  @ApiOperation({ summary: 'Get likes' })
+  @ApiOperation({ summary: 'Get matches' })
   @Get()
   async findAll(): Promise<Response> {
     try {
