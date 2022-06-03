@@ -3,7 +3,11 @@ import { CreatePaypalDto } from './dto/create-paypal.dto';
 
 @Injectable()
 export class PaypalService {
-  create(createPaypalDto: CreatePaypalDto, req, paypal) {
+  async create(createPaypalDto: CreatePaypalDto, req, paypal) {
+    let data = {
+      paymentId: '',
+      paypalLink: '',
+    };
     var create_payment_json = {
       intent: 'sale',
       payer: {
@@ -34,17 +38,19 @@ export class PaypalService {
         },
       ],
     };
-    paypal.payment.create(create_payment_json, function (error, payment) {
+    paypal.payment.create(create_payment_json, function async(error, payment) {
       if (error) {
         throw error;
       } else {
         for (let i = 0; i < payment.links.length; i++) {
           if (payment.links[i].rel === 'approval_url') {
-            console.log('payment: ', payment.id);
-            return {
-              paymentId: payment.id,
-              paypalLink: payment.links[i].href,
-            };
+            data.paymentId = payment.id;
+            data.paypalLink = payment.links[i].href;
+            console.log(data);
+            // return {
+            //   paymentId: payment.id,
+            //   paypalLink: payment.links[i].href,
+            // };
           }
         }
       }

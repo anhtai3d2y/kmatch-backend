@@ -72,7 +72,7 @@ export class RolesGuard implements CanActivate {
       // Only General Manager can take action for AdminUser, Permission, GroupPermission
       // Tất cả permission nào trong route handle có tên AdminUser,Permission đều được accept
       if (
-        user.role === Role.GeneralManager &&
+        user.role === Role.KmatchBasic &&
         (permission.includes('AdminUser') || permission.includes('Permission'))
       ) {
         return true;
@@ -94,7 +94,7 @@ export class RolesGuard implements CanActivate {
         // check permission current access to router handle
         // Tất cả role ko là General Manager, mà trong route handle có tên AdminUser, Permission đều bị từ chối
         if (
-          user.role !== Role.GeneralManager &&
+          user.role !== Role.KmatchBasic &&
           (permission.includes('AdminUser') ||
             permission.includes('Permission'))
         ) {
