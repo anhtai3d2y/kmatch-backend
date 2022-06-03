@@ -13,7 +13,8 @@ export class PaypalService {
     @InjectModel('User')
     private readonly userModel: Model<User>,
   ) {}
-  async create(createPaypalDto: CreatePaypalDto, paypal, req, res) {
+  async create(createPaypalDto: CreatePaypalDto, paypal, user, res) {
+    const userId = user._id.toString();
     let packageType: string = createPaypalDto.package
       .replace(' ', '_')
       .toUpperCase();
@@ -57,7 +58,7 @@ export class PaypalService {
               payment.links[i].href.indexOf('token') + 6,
             );
             await this.paypalModel.create({
-              userId: createPaypalDto.userId,
+              userId: userId,
               package: createPaypalDto.package,
               price: process.env[packageType],
               paymentId: payment.id,
