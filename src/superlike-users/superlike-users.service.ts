@@ -10,15 +10,43 @@ export class SuperlikeUsersService {
     @InjectModel('SuperlikeUsers')
     private readonly superlikeUserModel: Model<SuperlikeUsers>,
   ) {}
-  async create(createSuperlikeUserDto: CreateSuperlikeUserDto) {
-    const superlike = await this.superlikeUserModel.create(
-      createSuperlikeUserDto,
-    );
+  async create(createSuperlikeUserDto: CreateSuperlikeUserDto, user) {
+    const userId = user._id.toString();
+    const superlike = await this.superlikeUserModel.create({
+      userId: userId,
+      userSuperlikedId: createSuperlikeUserDto.userSuperlikedId,
+    });
     return superlike;
   }
 
-  async findAll() {
-    const superlike = await this.superlikeUserModel.find({});
+  async findAll(user) {
+    const userId = user._id.toString();
+    const superlike = await this.superlikeUserModel.aggregate([
+      { $match: { userId: userId } },
+      {
+        $addFields: {
+          userSuperlikedId: { $toObjectId: '$userSuperlikedId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userSuperlikedId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'user',
+        },
+      },
+    ]);
     return superlike;
   }
 

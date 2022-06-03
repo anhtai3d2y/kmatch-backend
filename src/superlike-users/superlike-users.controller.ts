@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Param, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  HttpStatus,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { SuperlikeUsersService } from './superlike-users.service';
 import { CreateSuperlikeUserDto } from './dto/create-superlike-user.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'utils/response';
 import { MessageErrorService } from 'src/message-error/message-error';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
 @ApiTags('superlike-users')
 @Controller('superlike-users')
 export class SuperlikeUsersController {
@@ -12,6 +23,8 @@ export class SuperlikeUsersController {
     private readonly messageError: MessageErrorService,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add new superlike' })
   @ApiBody({
     type: CreateSuperlikeUserDto,
@@ -21,10 +34,12 @@ export class SuperlikeUsersController {
   @Post()
   async create(
     @Body() createSuperlikeUserDto: CreateSuperlikeUserDto,
+    @Request() req,
   ): Promise<Response> {
     try {
       const data: any = await this.superlikeUsersService.create(
         createSuperlikeUserDto,
+        req.user,
       );
       return {
         statusCode: HttpStatus.OK,
@@ -36,11 +51,13 @@ export class SuperlikeUsersController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get superlikes' })
   @Get()
-  async findAll(): Promise<Response> {
+  async findAll(@Request() req): Promise<Response> {
     try {
-      const data: any = await this.superlikeUsersService.findAll();
+      const data: any = await this.superlikeUsersService.findAll(req.user);
       return {
         statusCode: HttpStatus.OK,
         message: 'Get successfully',
