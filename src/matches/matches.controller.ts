@@ -7,13 +7,17 @@ import {
   Delete,
   Put,
   HttpStatus,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { CreateMatchDto } from './dto/create-match.dto';
 import { UpdateMatchDto } from './dto/update-match.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'utils/response';
 import { MessageErrorService } from 'src/message-error/message-error';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
 @ApiTags('matches')
 @Controller('matches')
 export class MatchesController {
@@ -42,11 +46,13 @@ export class MatchesController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get matches' })
   @Get()
-  async findAll(): Promise<Response> {
+  async findAll(@Request() req): Promise<Response> {
     try {
-      const data: any = await this.matchesService.findAll();
+      const data: any = await this.matchesService.findAll(req.user);
       return {
         statusCode: HttpStatus.OK,
         message: 'Get successfully',
