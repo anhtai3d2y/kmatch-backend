@@ -10,13 +10,43 @@ export class DislikeUsersService {
     @InjectModel('DislikeUsers')
     private readonly dislikeUserModel: Model<DislikeUsers>,
   ) {}
-  async create(createDislikeUserDto: CreateDislikeUserDto) {
-    const dislike = await this.dislikeUserModel.create(createDislikeUserDto);
+  async create(createDislikeUserDto: CreateDislikeUserDto, user) {
+    const userId = user._id.toString();
+    const dislike = await this.dislikeUserModel.create({
+      userId: userId,
+      userDislikedId: createDislikeUserDto.userDislikedId,
+    });
     return dislike;
   }
 
-  async findAll() {
-    const dislike = await this.dislikeUserModel.find({});
+  async findAll(user) {
+    const userId = user._id.toString();
+    const dislike = await this.dislikeUserModel.aggregate([
+      { $match: { userId: userId } },
+      {
+        $addFields: {
+          userDislikedId: { $toObjectId: '$userDislikedId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userDislikedId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'user',
+        },
+      },
+    ]);
     return dislike;
   }
 

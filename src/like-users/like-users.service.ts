@@ -10,13 +10,43 @@ export class LikeUsersService {
     @InjectModel('LikeUsers')
     private readonly likeUserModel: Model<LikeUsers>,
   ) {}
-  async create(createLikeUserDto: CreateLikeUserDto) {
-    const like = await this.likeUserModel.create(createLikeUserDto);
+  async create(createLikeUserDto: CreateLikeUserDto, user) {
+    const userId = user._id.toString();
+    const like = await this.likeUserModel.create({
+      userId: userId,
+      userLikedId: createLikeUserDto.userLikedId,
+    });
     return like;
   }
 
-  async findAll() {
-    const like = await this.likeUserModel.find({});
+  async findAll(user) {
+    const userId = user._id.toString();
+    const like = await this.likeUserModel.aggregate([
+      { $match: { userId: userId } },
+      {
+        $addFields: {
+          userLikedId: { $toObjectId: '$userLikedId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userLikedId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'user',
+        },
+      },
+    ]);
     return like;
   }
 
