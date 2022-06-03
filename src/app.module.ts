@@ -60,6 +60,9 @@ export class AppModule {
         { path: 'auth/signup', method: RequestMethod.POST },
         { path: 'auth/refresh', method: RequestMethod.POST },
       )
-      .forRoutes({ path: 'user', method: RequestMethod.ALL });
+      .forRoutes(
+        { path: 'user', method: RequestMethod.ALL },
+        { path: 'paypal', method: RequestMethod.ALL },
+      );
   }
 }
