@@ -7,12 +7,15 @@ import {
   Res,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MessageErrorService } from 'src/message-error/message-error';
 import { Response } from 'utils/response';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
 const paypal = require('paypal-rest-sdk');
 
 paypal.configure({
@@ -29,13 +32,15 @@ export class PaypalController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   async create(
     @Res() res,
     @Request() req,
     @Body() createPaypalDto: CreatePaypalDto,
   ): Promise<any> {
     try {
-      this.paypalService.create(createPaypalDto, paypal, req, res);
+      this.paypalService.create(createPaypalDto, paypal, req.user, res);
     } catch (e) {
       return this.messageError.messageErrorController(e);
     }
