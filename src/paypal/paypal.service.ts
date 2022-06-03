@@ -1,13 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from 'src/users/interfaces/user.interfaces';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
+import { Paypal } from './interfaces/paypal.interfaces';
 
 @Injectable()
 export class PaypalService {
-  async create(createPaypalDto: CreatePaypalDto, req, paypal) {
-    let data = {
-      paymentId: '',
-      paypalLink: '',
-    };
+  constructor(
+    @InjectModel('Paypal')
+    private readonly paypalModel: Model<Paypal>,
+    @InjectModel('User')
+    private readonly userModel: Model<User>,
+  ) {}
+  async create(createPaypalDto: CreatePaypalDto, paypal, req, res) {
+    let packageType: string = createPaypalDto.package
+      .replace(' ', '_')
+      .toUpperCase();
     var create_payment_json = {
       intent: 'sale',
       payer: {
@@ -22,9 +31,9 @@ export class PaypalService {
           item_list: {
             items: [
               {
-                name: 'Kmatch gold',
+                name: createPaypalDto.package,
                 sku: '001',
-                price: '1.00',
+                price: process.env[packageType],
                 currency: 'USD',
                 quantity: 1,
               },
@@ -32,36 +41,79 @@ export class PaypalService {
           },
           amount: {
             currency: 'USD',
-            total: '1.00',
+            total: process.env[packageType],
           },
-          description: 'This is the payment description.',
+          description: `You are making a payment for ${createPaypalDto.package}`,
         },
       ],
     };
-    paypal.payment.create(create_payment_json, function async(error, payment) {
+    await paypal.payment.create(create_payment_json, async (error, payment) => {
       if (error) {
         throw error;
       } else {
         for (let i = 0; i < payment.links.length; i++) {
           if (payment.links[i].rel === 'approval_url') {
-            data.paymentId = payment.id;
-            data.paypalLink = payment.links[i].href;
-            console.log(data);
-            // return {
-            //   paymentId: payment.id,
-            //   paypalLink: payment.links[i].href,
-            // };
+            const token = payment.links[i].href.slice(
+              payment.links[i].href.indexOf('token') + 6,
+            );
+            await this.paypalModel.create({
+              userId: createPaypalDto.userId,
+              package: createPaypalDto.package,
+              price: process.env[packageType],
+              paymentId: payment.id,
+              token: token,
+            });
+            const data = {
+              paymentId: payment.id,
+              paypalLink: payment.links[i].href,
+            };
+            return res.status(200).json({
+              statusCode: HttpStatus.OK,
+              message: 'Create payment successfully!',
+              data: data,
+            });
           }
         }
       }
     });
   }
 
-  paymentSuccess() {
-    return '/api';
+  async paymentSuccess(query) {
+    const payment = await this.paypalModel.findOne({
+      paymentId: query.paymentId,
+      token: query.token,
+    });
+    try {
+      const data = await this.userModel.findByIdAndUpdate(payment.userId, {
+        role: payment.package,
+      });
+      return data;
+    } catch (e) {
+      if (e.name === 'MongoError') {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.CONFLICT,
+            message: 'common.CONFLICT',
+            error: 'Conflict',
+          },
+          409,
+        );
+      } else {
+        throw new HttpException(
+          {
+            error: 'ID_NOT_FOUND',
+            message: 'common.ID_NOT_FOUND',
+            statusCode: HttpStatus.NOT_FOUND,
+          },
+          404,
+        );
+      }
+    }
   }
 
-  paymentCancel() {
-    return `This is cancel payment`;
+  async paymentCancel(token) {
+    await this.paypalModel.deleteOne({
+      token: token,
+    });
   }
 }
