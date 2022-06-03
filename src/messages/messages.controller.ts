@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  HttpStatus,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MessageErrorService } from 'src/message-error/message-error';
 import { Response } from 'utils/response';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
+import { FilterMessageDto } from './dto/filter-message.dto';
 @ApiTags('messages')
 @Controller('messages')
 export class MessagesController {
@@ -12,6 +24,8 @@ export class MessagesController {
     private readonly messageError: MessageErrorService,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add new message' })
   @ApiBody({
     type: CreateMessageDto,
@@ -19,9 +33,15 @@ export class MessagesController {
     description: 'Add new match',
   })
   @Post()
-  async create(@Body() createMessageDto: CreateMessageDto): Promise<Response> {
+  async create(
+    @Body() createMessageDto: CreateMessageDto,
+    @Request() req,
+  ): Promise<Response> {
     try {
-      const data: any = await this.messagesService.create(createMessageDto);
+      const data: any = await this.messagesService.create(
+        createMessageDto,
+        req.user,
+      );
       return {
         statusCode: HttpStatus.OK,
         message: 'Create successfully',
@@ -32,11 +52,20 @@ export class MessagesController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get messages' })
   @Get()
-  async findAll(): Promise<Response> {
+  async findAll(
+    @Query() filterMessageDto: FilterMessageDto,
+    @Request() req,
+  ): Promise<Response> {
+    console.log(filterMessageDto);
     try {
-      const data: any = await this.messagesService.findAll();
+      const data: any = await this.messagesService.findAll(
+        filterMessageDto,
+        req.user,
+      );
       return {
         statusCode: HttpStatus.OK,
         message: 'Get successfully',

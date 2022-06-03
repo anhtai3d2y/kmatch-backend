@@ -18,16 +18,6 @@ export class CreateMessageDto {
   @IsMongoId()
   @ApiProperty({
     type: String,
-    description: 'senderId',
-    example: '62846ff7dc8f605051b07c73',
-  })
-  senderId: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @IsMongoId()
-  @ApiProperty({
-    type: String,
     description: 'receiverId',
     example: '62846ff7dc8f605051b07c73',
   })
