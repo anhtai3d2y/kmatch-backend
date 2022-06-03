@@ -1,23 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsMongoId,
-  IsIn,
-  IsString,
-  ValidateIf,
-  Matches,
-} from 'class-validator';
-import { Gender } from 'utils/constants/enum/gender.enum';
+import { IsNotEmpty, IsMongoId, IsString } from 'class-validator';
+import { Role } from 'utils/constants/enum/role.enum';
 
 export class CreatePaypalDto {
   @IsNotEmpty()
   @IsString()
+  @IsMongoId()
   @ApiProperty({ type: String, description: 'userId' })
   userId: string;
 
   @IsNotEmpty()
   @IsString()
-  @ApiProperty({ type: String, description: 'context' })
-  context: string;
+  @ApiProperty({
+    type: String,
+    description: 'package',
+    enum: Role,
+    default: Role.KmatchPlus,
+  })
+  package: string;
 }
