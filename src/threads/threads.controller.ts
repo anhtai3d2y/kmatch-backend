@@ -7,13 +7,17 @@ import {
   Delete,
   Put,
   HttpStatus,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ThreadsService } from './threads.service';
 import { CreateThreadDto } from './dto/create-thread.dto';
 import { UpdateThreadDto } from './dto/update-thread.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'utils/response';
 import { MessageErrorService } from 'src/message-error/message-error';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'common/guard/roles.guard';
 @ApiTags('threads')
 @Controller('threads')
 export class ThreadsController {
@@ -42,11 +46,13 @@ export class ThreadsController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get threads' })
   @Get()
-  async findAll(): Promise<Response> {
+  async findAll(@Request() req): Promise<Response> {
     try {
-      const data: any = await this.threadsService.findAll();
+      const data: any = await this.threadsService.findAll(req.user);
       return {
         statusCode: HttpStatus.OK,
         message: 'Get successfully',

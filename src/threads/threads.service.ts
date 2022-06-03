@@ -12,20 +12,84 @@ export class ThreadsService {
     private readonly threadsModel: Model<Threads>,
   ) {}
   async create(createThreadDto: CreateThreadDto) {
-    const like = await this.threadsModel.create(createThreadDto);
-    return like;
+    const thread = await this.threadsModel.create(createThreadDto);
+    return thread;
   }
 
-  async findAll() {
-    const like = await this.threadsModel.find({});
-    return like;
+  async findAll(user) {
+    const userId = user._id.toString();
+    const thread = await this.threadsModel.aggregate([
+      { $match: { $or: [{ userId: userId }, { otherUserId: userId }] } },
+      {
+        $addFields: {
+          userId: { $toObjectId: '$userId' },
+          otherUserId: { $toObjectId: '$otherUserId' },
+          threadId: { $toString: '$_id' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'user',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'otherUserId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'otherUser',
+        },
+      },
+      {
+        $lookup: {
+          from: 'messages',
+          localField: 'threadId',
+          foreignField: 'threadId',
+          pipeline: [
+            {
+              $sort: { createdAt: -1 },
+            },
+          ],
+          as: 'messages',
+        },
+      },
+      {
+        $addFields: {
+          messages: { $first: '$messages' },
+        },
+      },
+    ]);
+    return thread;
   }
 
   async findOne(id: string) {
-    const like = await this.threadsModel.findOne({
+    const thread = await this.threadsModel.findOne({
       _id: id,
     });
-    return like;
+    return thread;
   }
 
   async update(id: string, updateThreadDto: UpdateThreadDto) {
