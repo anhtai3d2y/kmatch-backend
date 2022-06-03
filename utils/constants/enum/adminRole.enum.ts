@@ -1,8 +1,6 @@
 export const AdminRole = [
-  'Admin',
-  'Admin Assistant',
-  'General Manager',
-  'Local Manager',
-  'Branch Manager',
-  'Branch Assistant',
+  'Kmatch Basic',
+  'Kmatch Plus',
+  'Kmatch Gold',
+  'Kmatch Platinum',
 ];
