@@ -26,8 +26,6 @@ import { RolesGuard } from '../../common/guard/roles.guard';
 import { ActionEnum } from '../../utils/constants/enum/action.enum';
 import { Permission } from '../../common/decorators/roles.decorator';
 
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('permissions')
 @Controller('permission')
 export class PermissionController {
@@ -36,6 +34,8 @@ export class PermissionController {
   @ApiOperation({ summary: 'Get all Permision ' })
   @Permission(ActionEnum.getPermission)
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   async getPermissions(@I18n() i18n: I18nContext): Promise<Response> {
     try {
       const permissions: any = await this.permissionService.getAllPermission();
