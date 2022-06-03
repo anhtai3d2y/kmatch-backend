@@ -3,12 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Request,
   Res,
-  HttpStatus,
+  Param,
+  Query,
 } from '@nestjs/common';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
@@ -32,32 +30,26 @@ export class PaypalController {
 
   @Post()
   async create(
+    @Res() res,
     @Request() req,
     @Body() createPaypalDto: CreatePaypalDto,
-  ): Promise<Response> {
+  ): Promise<any> {
     try {
-      const data = await this.paypalService.create(
-        createPaypalDto,
-        req,
-        paypal,
-      );
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Create payment successfully!',
-        data: data,
-      };
+      this.paypalService.create(createPaypalDto, paypal, req, res);
     } catch (e) {
       return this.messageError.messageErrorController(e);
     }
   }
 
   @Get('success')
-  async paymentSuccess(@Res() res) {
-    return await res.redirect(this.paypalService.paymentSuccess());
+  async paymentSuccess(@Query() query, @Res() res) {
+    await this.paypalService.paymentSuccess(query);
+    return res.redirect('/api');
   }
 
   @Get('cancel')
-  async paymentCancel() {
-    return await this.paypalService.paymentCancel();
+  async paymentCancel(@Query() query, @Res() res) {
+    await this.paypalService.paymentCancel(query.token);
+    return res.redirect('/api');
   }
 }
