@@ -22,69 +22,67 @@ export class GroupPermissionService {
     private readonly groupPermissionModel: Model<GroupPermission>,
   ) {}
 
-  // async getAllGroupPermission(): Promise<GroupPermission[]> {
-  //   const query = [
-  //     {
-  //       $lookup: {
-  //         from: 'permissions',
-  //         let: { permissionId: '$permissionId' },
-  //         pipeline: [
-  //           {
-  //             $match: {
-  //               $expr: {
-  //                 $in: [{ $toString: '$_id' }, '$$permissionId'],
-  //               },
-  //             },
-  //           },
-  //           {
-  //             $addFields: {
-  //               moduleName: { $split: ['$permissionCode', '_'] },
-  //             },
-  //           },
-  //           {
-  //             $addFields: {
-  //               moduleName: { $last: '$moduleName' },
-  //             },
-  //           },
-  //           // group
-  //           {
-  //             $group: {
-  //               _id: '$moduleName',
-  //               permissionList: {
-  //                 $push: {
-  //                   _id: '$_id',
-  //                   permissionName: '$permissionName',
-  //                   permissionCode: '$permissionCode',
-  //                 },
-  //               },
-  //             },
-  //           },
-  //           {
-  //             $project: {
-  //               moduleName: '$_id',
-  //               _id: 0,
-  //               permissionList: 1,
-  //             },
-  //           },
-  //           { $sort: { moduleName: 1 } },
-  //         ],
-  //         as: 'permissionsList',
-  //       },
-  //     },
-  //     {
-  //       $sort: {
-  //         role: 1,
-  //       },
-  //     },
-  //     {
-  //       $project: {
-  //         permissionId: 0,
-  //       },
-  //     },
-  //   ];
-
-  //   return await this.groupPermissionModel.aggregate(query);
-  // }
+  async getAllGroupPermission(): Promise<GroupPermission[]> {
+    return await this.groupPermissionModel.aggregate([
+      {
+        $lookup: {
+          from: 'permissions',
+          let: { permissionId: '$permissionId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: [{ $toString: '$_id' }, '$$permissionId'],
+                },
+              },
+            },
+            {
+              $addFields: {
+                moduleName: { $split: ['$permissionCode', '_'] },
+              },
+            },
+            {
+              $addFields: {
+                moduleName: { $last: '$moduleName' },
+              },
+            },
+            // group
+            {
+              $group: {
+                _id: '$moduleName',
+                permissionList: {
+                  $push: {
+                    _id: '$_id',
+                    permissionName: '$permissionName',
+                    permissionCode: '$permissionCode',
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                moduleName: '$_id',
+                _id: 0,
+                permissionList: 1,
+              },
+            },
+            { $sort: { moduleName: 1 } },
+          ],
+          as: 'permissionsList',
+        },
+      },
+      {
+        $sort: {
+          role: 1,
+        },
+      },
+      {
+        $project: {
+          permissionId: 0,
+        },
+      },
+    ]);
+  }
 
   async createGroupPermission(
     createGroupPermissionDto: CreateGroupPermissionDto,

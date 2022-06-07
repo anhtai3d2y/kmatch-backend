@@ -1,16 +1,35 @@
-import { IsArray, IsIn } from 'class-validator';
+import { IsArray, IsIn, IsNotEmpty } from 'class-validator';
 import { AdminRole } from '../../../utils/constants/enum/adminRole.enum';
 import { IsOptional } from 'class-validator';
+import { ApiParam, ApiProperty } from '@nestjs/swagger';
+import { Role } from 'utils/constants/enum/role.enum';
 
 export class UpdateGroupPermissionDto {
-  @IsOptional()
   @IsIn(AdminRole, { message: AdminRole.toString() })
+  @IsNotEmpty({ message: 'IsNotEmpty' })
+  @ApiProperty({
+    type: String,
+    description: 'role',
+    enum: Role,
+    default: Role.KmatchBasic,
+  })
   role: string;
 
-  @IsOptional()
+  @ApiProperty({
+    type: String,
+    description: 'additional',
+    example: `This is the role for ${Role.KmatchBasic} package.`,
+  })
   additional: string;
 
-  @IsOptional()
-  @IsArray({ message: 'IsArray_permissionId' })
+  @IsNotEmpty()
+  @IsArray()
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+      example: '62985fb29e4491027eedaa60',
+    },
+  })
   permissionId: string[];
 }

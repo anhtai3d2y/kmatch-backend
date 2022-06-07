@@ -60,7 +60,6 @@ export class MessagesController {
     @Query() filterMessageDto: FilterMessageDto,
     @Request() req,
   ): Promise<Response> {
-    console.log(filterMessageDto);
     try {
       const data: any = await this.messagesService.findAll(
         filterMessageDto,

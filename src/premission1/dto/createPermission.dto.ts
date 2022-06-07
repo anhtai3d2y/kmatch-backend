@@ -6,7 +6,7 @@ export class CreatePermissionDto {
   @IsNotEmpty()
   @ApiProperty({
     type: String,
-    example: 'Student manager',
+    example: 'Search User',
     description: 'Your permision',
   })
   permissionName: string;
@@ -14,7 +14,7 @@ export class CreatePermissionDto {
   @IsNotEmpty()
   @ApiProperty({
     type: String,
-    example: 'Your description',
+    example: 'search_User',
     description: 'Your description',
   })
   // @IsIn(Object.values(ActionEnum), {
