@@ -29,6 +29,7 @@ async function bootstrap() {
     .addTag('threads')
     .addTag('messages')
     .addTag('paypal')
+
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty } from 'class-validator';
+import { IsIn, IsOptional } from 'class-validator';
 import { ActionEnum } from '../../../utils/constants/enum/action.enum';
 
-export class CreatePermissionDto {
-  @IsNotEmpty()
+export class UpdatePermissionDto {
+  @IsOptional()
   @ApiProperty({
     type: String,
     example: 'Student manager',
@@ -11,14 +11,14 @@ export class CreatePermissionDto {
   })
   permissionName: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     type: String,
-    example: 'Your description',
-    description: 'Your description',
+    example: 'Your permissionCode',
+    description: 'Your permissionCode',
   })
-  // @IsIn(Object.values(ActionEnum), {
-  //   message: Object.values(ActionEnum).toString(),
-  // })
+  @IsIn(Object.values(ActionEnum), {
+    message: Object.values(ActionEnum).toString(),
+  })
   permissionCode: string;
 }

@@ -5,12 +5,12 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthService } from './auth.service';
 import { UserModule } from '../users/user.module';
 import { AuthController } from './auth.controller';
-// import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
+import { LoggerMiddleware } from '../../common/middlewares/logger.middleware';
 import { ConfigService } from '@nestjs/config';
 import { JwtRefreshTokenStrategy } from './strategy/jwtrefreshtoken.stragtegy';
 import { MessageErrorModule } from 'src/message-error/message-error.module';
 import { SendMailModule } from 'src/shared/send-mail/send-mail.module';
-
+import { GroupPermissionModule } from 'src/group-permission/group-permission.module';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -26,6 +26,7 @@ import { SendMailModule } from 'src/shared/send-mail/send-mail.module';
     UserModule,
     MessageErrorModule,
     SendMailModule,
+    GroupPermissionModule,
   ],
   providers: [
     AuthService,
@@ -38,11 +39,11 @@ import { SendMailModule } from 'src/shared/send-mail/send-mail.module';
 })
 export class AuthModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
-    // consumer
-    //   .apply(LoggerMiddleware)
-    //   // .exclude(
-    //   //   { path: 'example', method: RequestMethod.GET },
-    //   // )
-    //   .forRoutes(AuthController);
+    consumer
+      .apply(LoggerMiddleware)
+      // .exclude(
+      //   { path: 'example', method: RequestMethod.GET },
+      // )
+      .forRoutes(AuthController);
   }
 }
