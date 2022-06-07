@@ -1,14 +1,14 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-// import { GroupPermissionService } from '../../group-permission/group-permission.service';
+import { GroupPermissionService } from '../../group-permission/group-permission.service';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../../users/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    // private groupPermissionService: GroupPermissionService,
+    private groupPermissionService: GroupPermissionService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {
@@ -24,10 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException();
     }
-    // const per = await this.groupPermissionService.getPermissionsByRoleV2(
-    //   user.role,
-    // );
-    user.permission = [];
+    const per = await this.groupPermissionService.getPermissionsByRoleV2(
+      user.role,
+    );
+    user.permission = per;
     return user;
   }
 }

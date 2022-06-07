@@ -1,71 +1,64 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  HttpStatus,
-  Param,
   Post,
-  Put,
+  Body,
+  Patch,
+  Param,
+  Delete,
   UseGuards,
+  HttpStatus,
+  Put,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Permission1Service } from './premission1.service';
 import {
-  ApiTags,
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
-  ApiBody,
-  ApiConsumes,
+  ApiTags,
 } from '@nestjs/swagger';
-import { GroupPermissionService } from './group-permission.service';
-import { Response } from '../../utils/response';
-import { CreateGroupPermissionDto } from './dto/createGroupPermission.dto';
-import { UpdateGroupPermissionDto } from './dto/updateGroupPermission.dto';
-import { RolesGuard } from '../../common/guard/roles.guard';
-import { ActionEnum } from '../../utils/constants/enum/action.enum';
-import { Permission } from '../../common/decorators/roles.decorator';
-
-@Controller('group-permission')
-@ApiTags('group-permission')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RolesGuard)
-export class GroupPermissionController {
-  constructor(
-    private readonly groupPermissionService: GroupPermissionService,
-  ) {}
+import { RolesGuard } from 'common/guard/roles.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'utils/response';
+import { CreatePermissionDto } from './dto/createPermission.dto';
+import { UpdatePermissionDto } from './dto/updatePermission.dto';
+@ApiTags('permission')
+@Controller('premission')
+export class Premission1Controller {
+  constructor(private readonly premission1Service: Permission1Service) {}
 
   @Get()
-  // @Permission(ActionEnum.getGroupPermission)
-  @ApiOperation({ summary: 'Get all group permission' })
-  async getAllGroupPermission(): Promise<Response> {
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  async getPermissions(): Promise<Response> {
     try {
-      const result = await this.groupPermissionService.getAllGroupPermission();
+      const permissions: any = await this.premission1Service.getAllPermission();
       return {
         statusCode: HttpStatus.OK,
-        message: 'Get list group permission successfully!',
-        data: result,
+        message: 'Get list Permission successfully!',
+        data: permissions,
       };
     } catch (e) {
       return {
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message: 'Get list group permission failed!',
-        error: 'Unprocessable Entity',
+        message: 'Get list Permission failed!',
+        data: '',
       };
     }
   }
 
-  // @Permission(ActionEnum.getGroupPermission)
-  @ApiOperation({ summary: 'Get GroupPermission by Id' })
+  @ApiOperation({ summary: 'Get Permission by Id ' })
+  // @Permission(ActionEnum.getPermission)
   @ApiParam({ required: true, name: 'id', example: '6094dc6f51d62f00365ed928' })
   @Get(':id')
   async getPermission(@Param('id') id): Promise<Response> {
     try {
-      const gP = await this.groupPermissionService.getGroupPermissionBydID(id);
+      const permission = await this.premission1Service.getPermissionBydID(id);
       return {
         statusCode: HttpStatus.OK,
-        message: 'Get group permission item successfully',
-        data: gP,
+        message: 'Get item Permission successfully!',
+        data: permission,
       };
     } catch (e) {
       const message = e.response.message;
@@ -85,21 +78,17 @@ export class GroupPermissionController {
     }
   }
 
-  // @Permission(ActionEnum.createGroupPermission)
-  @ApiOperation({ summary: 'Create Group Permission' })
+  @ApiOperation({ summary: 'Create Permission' })
   @ApiBody({
-    type: CreateGroupPermissionDto,
+    type: CreatePermissionDto,
     required: true,
-    description: 'Create new Group permission',
+    description: 'Create new permission',
   })
   @Post('/')
-  async createGroupPermission(
-    @Body() createGroupPermissionDto: CreateGroupPermissionDto,
-  ): Promise<Response> {
+  // @Permission(ActionEnum.createPermission)
+  async createPermission(@Body() per: CreatePermissionDto): Promise<Response> {
     try {
-      const result = await this.groupPermissionService.createGroupPermission(
-        createGroupPermissionDto,
-      );
+      const result = await this.premission1Service.createPermission(per);
       return {
         statusCode: HttpStatus.OK,
         message: 'Create item successfully',
@@ -123,21 +112,17 @@ export class GroupPermissionController {
     }
   }
 
-  // @Permission(ActionEnum.updateGroupPermission)
-  @ApiParam({ required: true, name: 'id', example: '629ad6f2dd67c5e2356848ed' })
   @Put(':id')
-  async updateGroupPermission(
-    @Param('id') id,
-    @Body() updateData: UpdateGroupPermissionDto,
+  // @Permission(ActionEnum.updatePermission)
+  async updatePermission(
+    @Param('id') id: string,
+    @Body() per: UpdatePermissionDto,
   ): Promise<Response> {
     try {
-      const result = await this.groupPermissionService.updateGroupPermission(
-        id,
-        updateData,
-      );
+      const result = await this.premission1Service.updatePermission(id, per);
       return {
         statusCode: HttpStatus.OK,
-        message: 'Update item group permission successfully',
+        message: 'Update item successfully',
         data: result,
       };
     } catch (e) {
@@ -160,18 +145,16 @@ export class GroupPermissionController {
     }
   }
 
-  // @Permission(ActionEnum.deleteGroupPermission)
-  @ApiOperation({ summary: 'Delete GroupPermission by Id ' })
+  @ApiOperation({ summary: 'Delete Permission by Id ' })
+  // @Permission(ActionEnum.deletePermission)
   @ApiParam({ required: true, name: 'id', example: '6094dc6f51d62f00365ed928' })
   @Delete(':id')
-  async DeleteGroupPermissionByID(@Param('id') id: string): Promise<Response> {
+  async deletePermissionByID(@Param('id') id: string): Promise<Response> {
     try {
-      const result = await this.groupPermissionService.deleteGroupPermission(
-        id,
-      );
+      const result = await this.premission1Service.deletePermissionById(id);
       return {
         statusCode: HttpStatus.OK,
-        message: 'Delete item group permission successfully',
+        message: 'Delete item successfully',
         data: result,
       };
     } catch (e) {

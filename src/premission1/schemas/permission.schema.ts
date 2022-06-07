@@ -9,8 +9,8 @@ export const permissionSchema = new mongoose.Schema(
     },
     permissionCode: {
       type: String,
-      require: true,
-      unique: true,
+      // require: true,
+      // unique: true,
       // enum: Object.values(ActionEnum),
     },
   },

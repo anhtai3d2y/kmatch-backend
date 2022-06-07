@@ -1,4 +1,3 @@
-import { I18nService } from 'nestjs-i18n';
 import {
   ExceptionFilter,
   Catch,
@@ -10,8 +9,6 @@ import { Response } from 'express';
 
 @Catch(HttpException)
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private readonly i18n: I18nService) {}
-
   async catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -26,23 +23,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         JSON.parse(JSON.stringify(exception.getResponse())).message ===
         'Forbidden resource'
       ) {
-        const message = await this.i18n.translate(
-          `validation.Forbidden_resource`,
-          {
-            lang: ctx.getRequest().i18nLang,
-          },
-        );
+        const message = 'Forbidden Resource';
         response.status(statusCode).json({
           statusCode: HttpStatus.FORBIDDEN,
-          message:
-            message ??
-            (await this.i18n.translate('common.SYSTEM_ERROR'),
-            {
-              lang: ctx.getRequest().i18nLang,
-            }),
-          error: await this.i18n.translate('validation.UNPROCESSABLE_ENTITY', {
-            lang: ctx.getRequest().i18nLang,
-          }),
+          message: message ?? 'A system error has occurred!',
+          error: 'Unprocessable Entity',
         });
       } else {
         response.status(statusCode).json(exception.getResponse());
@@ -53,22 +38,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         args: Record<string, any>;
       };
 
-      message = await this.i18n.translate(message.key, {
-        lang: ctx.getRequest().i18nLang,
-        args: message.args,
-      });
-
       response.status(statusCode).json({
         statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        message:
-          message ??
-          (await this.i18n.translate('common.SYSTEM_ERROR'),
-          {
-            lang: ctx.getRequest().i18nLang,
-          }),
-        error: await this.i18n.translate('validation.UNPROCESSABLE_ENTITY', {
-          lang: ctx.getRequest().i18nLang,
-        }),
+        message: message ?? 'A system error has occurred!',
+        error: 'Unprocessable Entity',
       });
     }
   }

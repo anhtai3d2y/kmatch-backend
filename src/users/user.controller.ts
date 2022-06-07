@@ -31,6 +31,8 @@ import { MessageErrorService } from 'src/message-error/message-error';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Permission } from 'common/decorators/roles.decorator';
+import { ActionEnum } from 'utils/constants/enum/action.enum';
 
 @ApiTags('user')
 @Controller('user')
@@ -40,6 +42,7 @@ export class UserController {
     private readonly configService: ConfigService,
   ) {}
 
+  // @Permission(ActionEnum.getUser)
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
@@ -48,6 +51,7 @@ export class UserController {
     @Request() req,
     @Query() search: FilterUserDto,
   ): Promise<Response> {
+    console.log('user: ', req.user);
     try {
       const data: any = await this.userService.getAllOrSearchUser(
         search.textSearch,

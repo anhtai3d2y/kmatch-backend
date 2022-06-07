@@ -5,7 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { groupPermissionSchema } from './schemas/group-permission.schema';
 import { PermissionModule } from '../permission/permission.module';
 import { RolesGuard } from '../../common/guard/roles.guard';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [

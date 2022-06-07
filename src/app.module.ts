@@ -18,6 +18,11 @@ import { DislikeUsersModule } from './dislike-users/dislike-users.module';
 import { ChatGateway } from './chat.gateway';
 import { SuperlikeUsersModule } from './superlike-users/superlike-users.module';
 import { SuperlikeStarModule } from './superlike-star/superlike-star.module';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { AllExceptionsFilter } from 'common/filters/all-exception.filter';
+import { TransformInterceptor } from 'common/interceptors/transform.interceptor';
+import { Premission1Module } from './premission1/premission1.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -25,6 +30,7 @@ import { SuperlikeStarModule } from './superlike-star/superlike-star.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
@@ -45,9 +51,21 @@ import { SuperlikeStarModule } from './superlike-star/superlike-star.module';
     DislikeUsersModule,
     SuperlikeUsersModule,
     SuperlikeStarModule,
+    Premission1Module,
   ],
   controllers: [AppController, UserController],
-  providers: [AppService, ChatGateway],
+  providers: [
+    AppService,
+    ChatGateway,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
@@ -62,6 +80,7 @@ export class AppModule {
       )
       .forRoutes(
         { path: 'user', method: RequestMethod.ALL },
+        { path: 'permission', method: RequestMethod.ALL },
         { path: 'paypal', method: RequestMethod.ALL },
       );
   }
