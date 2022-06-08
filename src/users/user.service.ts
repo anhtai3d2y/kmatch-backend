@@ -60,6 +60,18 @@ export class UserService {
     return users;
   }
 
+  async getUsersNewsfeed(search: string): Promise<User | any> {
+    const users = await this.userModel.aggregate([
+      {
+        $project: {
+          password: 0,
+          currentHashedRefreshToken: 0,
+        },
+      },
+    ]);
+    return users;
+  }
+
   async createUser(payload: any, file: any) {
     const fileName = `./images/${uuid()}.png`;
     fs.createWriteStream(fileName).write(file.buffer);
