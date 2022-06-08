@@ -95,9 +95,14 @@ export class AuthService {
     }
   }
 
-  async sendCodeVerification(forgotPassword: ForgotPasswordDto) {
-    const data = await this.userService.findOne(forgotPassword.email);
+  async sendCodeVerification(verification: ForgotPasswordDto) {
+    const data = await this.userService.findOne(verification.email);
     return await this.sendEmail.sendCodeVerification(data);
+  }
+
+  async sendCodeVerificationForgotPassword(forgotPassword: ForgotPasswordDto) {
+    const data = await this.userService.findOne(forgotPassword.email);
+    return await this.sendEmail.sendCodeVerificationForgotPassword(data);
   }
 
   async resetPassword(resetPassword: ResetPasswordDto) {
