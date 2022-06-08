@@ -80,6 +80,7 @@ export class AuthController {
     }
   }
 
+  @ApiOperation({ summary: 'User login' })
   @Post('login')
   async login(@Body() payload: LoginRequestDto): Promise<Response> {
     try {
@@ -128,6 +129,28 @@ export class AuthController {
   }
 
   //send mail varificatin
+  @ApiOperation({ summary: 'Send code verification for register' })
+  @ApiBody({
+    type: ForgotPasswordDto,
+    required: true,
+    description: 'Send code verification for register',
+  })
+  @Post('/verification')
+  async sendCodeVerification(@Body() verification: ForgotPasswordDto) {
+    try {
+      const data = await this.authService.sendCodeVerification(verification);
+      return {
+        statusCode: HttpStatus.OK,
+        message:
+          'Send mail successfully, please check your email to enter the confirmation code',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  //send mail varificatin
   @ApiOperation({ summary: 'Send code verification password retrieval' })
   @ApiBody({
     type: ForgotPasswordDto,
@@ -135,9 +158,13 @@ export class AuthController {
     description: 'Send code verification password retrieval',
   })
   @Post('/forgetpassword')
-  async sendCodeVerification(@Body() forgetpassword: ForgotPasswordDto) {
+  async sendCodeVerificationForgotPassword(
+    @Body() forgetpassword: ForgotPasswordDto,
+  ) {
     try {
-      const data = await this.authService.sendCodeVerification(forgetpassword);
+      const data = await this.authService.sendCodeVerificationForgotPassword(
+        forgetpassword,
+      );
       return {
         statusCode: HttpStatus.OK,
         message:

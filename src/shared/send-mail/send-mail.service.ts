@@ -58,7 +58,39 @@ export class SendMailService {
     }
   }
 
-  async sendCodeVerification(data) {
+  async sendCodeVerification(email) {
+    try {
+      const code = await randomInt(100000, 999999);
+      return await this.mailerService
+        .sendMail({
+          to: email,
+          subject: 'Register confirmation code ✔',
+          template: '/register', // The `.pug` or `.hbs` extension is appended automatically.
+          context: {
+            // Data to be sent to template engine.
+            code: code,
+            username: email,
+          },
+        })
+        .then((success) => {
+          const data = {
+            message: success.response,
+            verificationCode: code,
+          };
+          return data;
+        });
+    } catch (err) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.FORBIDDEN,
+          message: `${err}`,
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+  }
+
+  async sendCodeVerificationForgotPassword(data) {
     if (data !== null) {
       try {
         const code = await randomInt(100000, 999999);

@@ -3,25 +3,25 @@ import { Model } from 'mongoose';
 import * as Bcrypt from 'bcryptjs';
 import * as bcrypt from 'bcryptjs';
 import { User } from './interfaces/user.interfaces';
-import { Role } from '../../utils/constants/enum/role.enum';
 import { ObjectID } from 'mongodb';
 import { PagingService } from '../shared/handling-paging/paging.service';
 import {
   HttpException,
   HttpStatus,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { uuid } from '../../utils/util';
 import * as fs from 'fs';
 import { deleteFile, uploadFile } from 'utils/cloudinary';
+import { SendMailService } from 'src/shared/send-mail/send-mail.service';
 
 export class UserService {
   constructor(
     @InjectModel('User')
     private readonly userModel: Model<User>,
     private pagingService: PagingService,
+    private readonly sendEmail: SendMailService,
   ) {}
 
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: string) {
@@ -60,7 +60,7 @@ export class UserService {
     return users;
   }
 
-  async getUsersNewsfeed(search: string): Promise<User | any> {
+  async getUsersNewsfeed(paging, user): Promise<User | any> {
     const users = await this.userModel.aggregate([
       {
         $project: {
@@ -69,7 +69,7 @@ export class UserService {
         },
       },
     ]);
-    return users;
+    return this.pagingService.controlPaging(users, paging);
   }
 
   async createUser(payload: any, file: any) {
@@ -89,6 +89,11 @@ export class UserService {
         secureURL: fileUploaded.secure_url,
       },
     });
+    const emailPassword = {
+      email: payload.email,
+      password: payload.password,
+    };
+    await this.sendEmail.sendUserPass(emailPassword);
     user.password = null;
     return user;
   }

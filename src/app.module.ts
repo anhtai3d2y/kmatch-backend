@@ -23,6 +23,7 @@ import { AllExceptionsFilter } from 'common/filters/all-exception.filter';
 import { TransformInterceptor } from 'common/interceptors/transform.interceptor';
 import { Premission1Module } from './premission1/premission1.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SuperlikeUsersModule,
     SuperlikeStarModule,
     Premission1Module,
+    VerificationModule,
   ],
   controllers: [AppController, UserController],
   providers: [

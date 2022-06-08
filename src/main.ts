@@ -18,6 +18,7 @@ async function bootstrap() {
     .setDescription('The kmatch API ')
     .setVersion('1.0')
     .addTag('auth')
+    .addTag('verification')
     .addTag('user')
     .addTag('permission')
     .addTag('group-permission')

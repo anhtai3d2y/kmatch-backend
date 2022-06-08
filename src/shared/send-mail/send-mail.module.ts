@@ -17,7 +17,7 @@ import { ConfigService } from '@nestjs/config';
           // debug: true,
           auth: {
             user: 'kmagearmanagement@gmail.com' || config.get('EMAIL_ID'), // generated ethereal user
-            pass: 'Phamduytai27112k' || config.get('EMAIL_PASS'), // generated ethereal password
+            pass: 'mrgypjryownusbso' || config.get('EMAIL_PASS'), // generated ethereal password
           },
         },
         defaults: {
