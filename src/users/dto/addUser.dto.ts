@@ -9,6 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Gender } from 'utils/constants/enum/gender.enum';
+import { Role } from 'utils/constants/enum/role.enum';
 
 export class AddUserDto {
   @IsNotEmpty()
@@ -39,7 +40,12 @@ export class AddUserDto {
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ type: String, description: 'role' })
+  @ApiProperty({
+    type: String,
+    description: 'role',
+    enum: Role,
+    default: Role.KmatchBasic,
+  })
   role: string;
 
   @IsNotEmpty()

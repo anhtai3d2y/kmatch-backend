@@ -33,6 +33,7 @@ import { RolesGuard } from 'common/guard/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Permission } from 'common/decorators/roles.decorator';
 import { ActionEnum } from 'utils/constants/enum/action.enum';
+import { PagingDto } from 'src/shared/handling-paging/dto/paging.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -85,12 +86,12 @@ export class UserController {
   @ApiOperation({ summary: 'Get users newsfeed' })
   async getUsersNewsfeed(
     @Request() req,
-    @Query() search: FilterUserDto,
+    @Query() paging: PagingDto,
   ): Promise<Response> {
-    console.log('user: ', req.user);
     try {
       const data: any = await this.userService.getUsersNewsfeed(
-        search.textSearch,
+        paging,
+        req.user,
       );
       return {
         statusCode: HttpStatus.OK,
