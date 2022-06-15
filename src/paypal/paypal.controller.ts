@@ -20,8 +20,12 @@ const paypal = require('paypal-rest-sdk');
 
 paypal.configure({
   mode: 'sandbox', //sandbox or live
-  client_id: process.env.PAYPAL_CLIENT_ID,
-  client_secret: process.env.PAYPAL_CLIENT_SECRET,
+  client_id:
+    process.env.PAYPAL_CLIENT_ID ||
+    'AeW1yFwajTaiDGXbasMaW7TzaNJiGwMPsNHXI7TAVspBpjwocg4z4lNaLtkXNMSuAnlVmT081miMrRBm',
+  client_secret:
+    process.env.PAYPAL_CLIENT_SECRET ||
+    'EHugYMrVgLbSRDywiotgb08QZyAyfDPX7yvDRVdtmMOmjUFkSM0m_FQOioYo2hCqV2aIviAWWaNLAeKB',
 });
 @ApiTags('paypal')
 @Controller('paypal')
@@ -42,6 +46,7 @@ export class PaypalController {
     try {
       this.paypalService.create(createPaypalDto, paypal, req.user, res);
     } catch (e) {
+      console.log(e);
       return this.messageError.messageErrorController(e);
     }
   }
