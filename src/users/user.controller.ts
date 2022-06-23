@@ -52,7 +52,6 @@ export class UserController {
     @Request() req,
     @Query() search: FilterUserDto,
   ): Promise<Response> {
-    console.log('user: ', req.user);
     try {
       const data: any = await this.userService.getAllOrSearchUser(
         search.textSearch,
