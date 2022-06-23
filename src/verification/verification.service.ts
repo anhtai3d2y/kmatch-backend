@@ -54,7 +54,6 @@ export class VerificationService {
   }
 
   async getVerification(getVerificationDto: GetVerificationDto) {
-    console.log(getVerificationDto);
     const verification = await this.verificationModel.findOne({
       email: getVerificationDto.email,
     });
