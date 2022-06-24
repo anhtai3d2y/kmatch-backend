@@ -299,7 +299,7 @@ export class GroupPermissionService {
   }
 
   async getPermissionsByRoleV2(role: string) {
-    const query = [
+    const gP = await this.groupPermissionModel.aggregate([
       {
         $match: { role: role },
       },
@@ -338,9 +338,7 @@ export class GroupPermissionService {
           createdAt: 0,
         },
       },
-    ];
-
-    const gP = await this.groupPermissionModel.aggregate(query);
+    ]);
     return gP[0].permissionCode;
   }
 }

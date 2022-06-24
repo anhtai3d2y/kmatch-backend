@@ -22,51 +22,51 @@ export class MatchesService {
       {
         $match: { $or: [{ userId: userId }, { otherUserId: userId }] },
       },
-      {
-        $addFields: {
-          userId: { $toObjectId: '$userId' },
-          otherUserId: { $toObjectId: '$otherUserId' },
-        },
-      },
-      {
-        $addFields: {
-          userId: {
-            $cond: {
-              if: { $eq: ['$userId', user._id] },
-              then: '$userId',
-              else: '$otherUserId',
-            },
-          },
-          otherUserId: {
-            $cond: {
-              if: { $ne: ['$userId', user._id] },
-              then: '$userId',
-              else: '$otherUserId',
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'otherUserId',
-          foreignField: '_id',
-          pipeline: [
-            {
-              $project: {
-                name: 1,
-                avatar: 1,
-                gender: 1,
-                birthday: 1,
-              },
-            },
-          ],
-          as: 'otherUser',
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
+      // {
+      //   $addFields: {
+      //     userId: { $toObjectId: '$userId' },
+      //     otherUserId: { $toObjectId: '$otherUserId' },
+      //   },
+      // },
+      // {
+      //   $addFields: {
+      //     userId: {
+      //       $cond: {
+      //         if: { $eq: ['$userId', user._id] },
+      //         then: '$userId',
+      //         else: '$otherUserId',
+      //       },
+      //     },
+      //     otherUserId: {
+      //       $cond: {
+      //         if: { $ne: ['$userId', user._id] },
+      //         then: '$userId',
+      //         else: '$otherUserId',
+      //       },
+      //     },
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'users',
+      //     localField: 'otherUserId',
+      //     foreignField: '_id',
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           name: 1,
+      //           avatar: 1,
+      //           gender: 1,
+      //           birthday: 1,
+      //         },
+      //       },
+      //     ],
+      //     as: 'otherUser',
+      //   },
+      // },
+      // {
+      //   $sort: { createdAt: -1 },
+      // },
     ]);
     return like;
   }
