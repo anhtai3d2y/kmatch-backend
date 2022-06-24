@@ -117,6 +117,7 @@ export class AuthController {
     @Body() user: AddUserDto,
   ): Promise<Response> {
     try {
+      console.log('file: ', file);
       const data: any = await this.userService.createUser(user, file);
       return {
         statusCode: HttpStatus.OK,
