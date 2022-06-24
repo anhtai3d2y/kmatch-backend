@@ -76,6 +76,7 @@ export class UserService {
     const fileName = `./images/${uuid()}.png`;
     fs.createWriteStream(fileName).write(file.buffer);
     const fileUploaded = await uploadFile(fileName);
+    console.log('fileUploaded: ', fileUploaded);
     fs.unlink(fileName, (err) => {
       if (err) console.log(err);
     });
