@@ -339,6 +339,6 @@ export class GroupPermissionService {
         },
       },
     ]);
-    return gP[0].permissionCode;
+    return gP[0]?.permissionCode;
   }
 }
