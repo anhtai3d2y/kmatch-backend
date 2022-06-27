@@ -74,10 +74,11 @@ export class UserService {
 
   async createUser(payload: any, file: any) {
     const fileName = `./images/${uuid()}.png`;
-    console.log('ok');
-    fs.createWriteStream(fileName).write(file.buffer);
-    console.log('ok1');
+    await fs.createWriteStream(fileName).write(file.buffer);
     const fileUploaded = await uploadFile(fileName);
+    fs.unlink(fileName, (err) => {
+      if (err) console.log('err: ', err);
+    });
     console.log('fileUploaded: ', fileUploaded);
     const salt = await Bcrypt.genSalt(10);
     const password = await Bcrypt.hash(payload.password, salt);
@@ -95,9 +96,6 @@ export class UserService {
     };
     await this.sendEmail.sendUserPass(emailPassword);
     user.password = null;
-    fs.unlink(fileName, (err) => {
-      if (err) console.log('err: ', err);
-    });
     return user;
   }
 
