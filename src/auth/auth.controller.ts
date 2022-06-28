@@ -117,6 +117,7 @@ export class AuthController {
     @Body() user: AddUserDto,
   ): Promise<Response> {
     try {
+      console.log('file: ', file);
       const data: any = await this.userService.createUser(user, file);
       return {
         statusCode: HttpStatus.OK,
@@ -215,6 +216,20 @@ export class AuthController {
       return {
         statusCode: HttpStatus.OK,
         message: 'change password successfullys',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @Post('seeder')
+  async generateUsers(): Promise<Response> {
+    try {
+      const data: any = await this.userService.generateUsers();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Create successfully',
         data: data,
       };
     } catch (e) {

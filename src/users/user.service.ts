@@ -15,6 +15,10 @@ import { uuid } from '../../utils/util';
 import * as fs from 'fs';
 import { deleteFile, uploadFile } from 'utils/cloudinary';
 import { SendMailService } from 'src/shared/send-mail/send-mail.service';
+import { avatarMale } from 'images/avatarMale';
+import { avatarFemale } from 'images/avatarFemale';
+import { nameMale } from 'images/nameMale';
+import { nameFemale } from 'images/nameFemale';
 
 export class UserService {
   constructor(
@@ -74,11 +78,12 @@ export class UserService {
 
   async createUser(payload: any, file: any) {
     const fileName = `./images/${uuid()}.png`;
-    fs.createWriteStream(fileName).write(file.buffer);
+    await fs.createWriteStream(fileName).write(file.buffer);
     const fileUploaded = await uploadFile(fileName);
     fs.unlink(fileName, (err) => {
-      if (err) console.log(err);
+      if (err) console.log('err: ', err);
     });
+    console.log('fileUploaded: ', fileUploaded);
     const salt = await Bcrypt.genSalt(10);
     const password = await Bcrypt.hash(payload.password, salt);
     const user = await this.userModel.create({
@@ -96,6 +101,56 @@ export class UserService {
     await this.sendEmail.sendUserPass(emailPassword);
     user.password = null;
     return user;
+  }
+
+  async generateUsers() {
+    const salt = await Bcrypt.genSalt(10);
+    const password = await Bcrypt.hash('anhtai3d2y', salt);
+    const avatar = {
+      Male: avatarMale,
+      Female: avatarFemale,
+    };
+    const name = {
+      Male: nameMale,
+      Female: nameFemale,
+    };
+    const gender = ['Male', 'Female'];
+    for (let i = 1; i <= 100; i++) {
+      const genderPicked = gender[Math.floor(Math.random() * gender.length)];
+      const birthdayPicked =
+        Math.floor(Math.random() * (2006 - 1992) + 1992) +
+        '/' +
+        Math.floor(Math.random() * (12 - 1) + 1) +
+        '/' +
+        Math.floor(Math.random() * (28 - 1) + 1);
+      const phonenumberPicked =
+        '0' + Math.floor(Math.random() * (999999999 - 100000000) + 100000000);
+      const namePicked =
+        name[genderPicked][
+          Math.floor(Math.random() * name[genderPicked].length)
+        ];
+      const avatarPicked =
+        avatar[genderPicked][
+          Math.floor(Math.random() * avatar[genderPicked].length)
+        ];
+      const user = {
+        email: `user${i}@gmail.com`,
+        name: namePicked,
+        gender: genderPicked,
+        password,
+        avatar: {
+          publicId: avatarPicked,
+          secureURL: `https://res.cloudinary.com/anhtai3d2y/image/upload/v1652849219/kmatch/${avatarPicked}.jpg`,
+        },
+        role: 'Kmatch Basic',
+        birthday: birthdayPicked,
+        phonenumber: phonenumberPicked,
+      };
+      await this.userModel.create(user);
+      console.log('user #', i);
+    }
+
+    return 'ok';
   }
 
   // Find user details with email id
@@ -211,17 +266,17 @@ export class UserService {
     lat2 = (lat2 * Math.PI) / 180;
 
     // Haversine formula
-    let dlon = lon2 - lon1;
-    let dlat = lat2 - lat1;
-    let a =
+    const dlon = lon2 - lon1;
+    const dlat = lat2 - lat1;
+    const a =
       Math.pow(Math.sin(dlat / 2), 2) +
       Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2), 2);
 
-    let c = 2 * Math.asin(Math.sqrt(a));
+    const c = 2 * Math.asin(Math.sqrt(a));
 
     // Radius of earth in kilometers. Use 3956
     // for miles
-    let r = 6371;
+    const r = 6371;
 
     // calculate the result
     return c * r;
