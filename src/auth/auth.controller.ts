@@ -222,4 +222,18 @@ export class AuthController {
       return this.messageError.messageErrorController(e);
     }
   }
+
+  @Post('seeder')
+  async generateUsers(): Promise<Response> {
+    try {
+      const data: any = await this.userService.generateUsers();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Create successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
 }
