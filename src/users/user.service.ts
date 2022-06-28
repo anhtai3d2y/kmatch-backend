@@ -15,6 +15,10 @@ import { uuid } from '../../utils/util';
 import * as fs from 'fs';
 import { deleteFile, uploadFile } from 'utils/cloudinary';
 import { SendMailService } from 'src/shared/send-mail/send-mail.service';
+import { avatarMale } from 'images/avatarMale';
+import { avatarFemale } from 'images/avatarFemale';
+import { nameMale } from 'images/nameMale';
+import { nameFemale } from 'images/nameFemale';
 
 export class UserService {
   constructor(
@@ -97,6 +101,56 @@ export class UserService {
     await this.sendEmail.sendUserPass(emailPassword);
     user.password = null;
     return user;
+  }
+
+  async generateUsers() {
+    const salt = await Bcrypt.genSalt(10);
+    const password = await Bcrypt.hash('anhtai3d2y', salt);
+    const avatar = {
+      Male: avatarMale,
+      Female: avatarFemale,
+    };
+    const name = {
+      Male: nameMale,
+      Female: nameFemale,
+    };
+    const gender = ['Male', 'Female'];
+    for (let i = 1; i <= 100; i++) {
+      const genderPicked = gender[Math.floor(Math.random() * gender.length)];
+      const birthdayPicked =
+        Math.floor(Math.random() * (2006 - 1992) + 1992) +
+        '/' +
+        Math.floor(Math.random() * (12 - 1) + 1) +
+        '/' +
+        Math.floor(Math.random() * (28 - 1) + 1);
+      const phonenumberPicked =
+        '0' + Math.floor(Math.random() * (999999999 - 100000000) + 100000000);
+      const namePicked =
+        name[genderPicked][
+          Math.floor(Math.random() * name[genderPicked].length)
+        ];
+      const avatarPicked =
+        avatar[genderPicked][
+          Math.floor(Math.random() * avatar[genderPicked].length)
+        ];
+      const user = {
+        email: `user${i}@gmail.com`,
+        name: namePicked,
+        gender: genderPicked,
+        password,
+        avatar: {
+          publicId: avatarPicked,
+          secureURL: `https://res.cloudinary.com/anhtai3d2y/image/upload/v1652849219/kmatch/${avatarPicked}.jpg`,
+        },
+        role: 'Kmatch Basic',
+        birthday: birthdayPicked,
+        phonenumber: phonenumberPicked,
+      };
+      await this.userModel.create(user);
+      console.log('user #', i);
+    }
+
+    return 'ok';
   }
 
   // Find user details with email id
