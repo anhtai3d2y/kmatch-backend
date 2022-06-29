@@ -46,6 +46,9 @@ export class LikeUsersService {
           as: 'user',
         },
       },
+      {
+        $unwind: '$user',
+      },
     ]);
     return like;
   }

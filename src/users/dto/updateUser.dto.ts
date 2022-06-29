@@ -12,14 +12,6 @@ import {
 import { Gender } from 'utils/constants/enum/gender.enum';
 
 export class UpdateUserDto {
-  @ApiProperty({
-    type: String,
-    example: '627dd7d36f82e349327bf1a1',
-    description: 'Your id',
-    required: true,
-  })
-  id: string;
-
   @IsOptional()
   @ApiProperty({
     type: String,
@@ -53,7 +45,7 @@ export class UpdateUserDto {
   @IsOptional()
   @ApiProperty({
     type: String,
-    example: 'Branch Manager',
+    example: 'Kmatch Basic',
     description: 'Your role',
   })
   // @IsIn(AdminRole, { message: AdminRole.toString() })
@@ -64,6 +56,22 @@ export class UpdateUserDto {
   @IsString()
   @IsIn(Gender, { message: Gender.toString() })
   gender: string;
+
+  @IsOptional()
+  @ApiProperty({
+    type: Number,
+    description: 'Your latitude',
+    example: 20.982353845604987,
+  })
+  latitude: number;
+
+  @IsOptional()
+  @ApiProperty({
+    type: Number,
+    description: 'Your longitude',
+    example: 105.78607285199709,
+  })
+  longitude: number;
 
   @IsOptional()
   @ApiProperty({

@@ -46,6 +46,9 @@ export class DislikeUsersService {
           as: 'user',
         },
       },
+      {
+        $unwind: '$user',
+      },
     ]);
     return dislike;
   }
