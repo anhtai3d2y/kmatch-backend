@@ -15,12 +15,10 @@ import { superlikeUsersSchema } from 'src/superlike-users/schemas/superlike-user
 @Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'User', schema: userSchema }]),
-    MongooseModule.forFeature([{ name: 'LikeUsers', schema: likeUsersSchema }]),
     MongooseModule.forFeature([
+      { name: 'User', schema: userSchema },
+      { name: 'LikeUsers', schema: likeUsersSchema },
       { name: 'DislikeUsers', schema: dislikeUsersSchema },
-    ]),
-    MongooseModule.forFeature([
       { name: 'SuperlikeUsers', schema: superlikeUsersSchema },
     ]),
   ],
