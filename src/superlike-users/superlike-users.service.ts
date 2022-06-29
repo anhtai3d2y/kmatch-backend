@@ -46,6 +46,9 @@ export class SuperlikeUsersService {
           as: 'user',
         },
       },
+      {
+        $unwind: '$user',
+      },
     ]);
     return superlike;
   }

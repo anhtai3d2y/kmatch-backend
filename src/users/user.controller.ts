@@ -116,7 +116,7 @@ export class UserController {
   }
 
   // @Post()
-  @Put(':id')
+  @Put()
   @ApiOperation({ summary: 'Update user' })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
@@ -124,15 +124,15 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar'))
   @ApiBody({
     type: UpdateUserDto,
-    required: true,
     description: 'Update user',
   })
   async updateUser(
+    @Request() req,
     @UploadedFile() file: Express.Multer.File,
     @Body() payload: UpdateUserDto,
   ): Promise<Response> {
     try {
-      const result = await this.userService.updateUser(payload, file);
+      const result = await this.userService.updateUser(req.user, payload, file);
       return {
         statusCode: HttpStatus.OK,
         message: 'Update user successfully!',

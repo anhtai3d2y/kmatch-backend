@@ -16,7 +16,7 @@ export class SendMailService {
       .sendMail({
         to: email,
         subject: 'Password reset confirmation code ✔',
-        template: '/index', // The `.pug` or `.hbs` extension is appended automatically.
+        template: './index', // The `.pug` or `.hbs` extension is appended automatically.
         context: {
           // Data to be sent to template engine.
           code: code,
