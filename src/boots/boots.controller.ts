@@ -24,14 +24,12 @@ export class BootsController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Add new dislike' })
+  @ApiOperation({ summary: 'Add new boots' })
   @ApiBody({
     type: CreateBootDto,
     required: true,
     description: 'Add new boots',
   })
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @ApiBearerAuth()
   @Post()
   async create(@Body() createBootDto: CreateBootDto, @Request() req) {
     try {
@@ -54,7 +52,24 @@ export class BootsController {
       const data = await this.bootsService.findAll(req.user);
       return {
         statusCode: HttpStatus.OK,
-        message: 'Create successfully',
+        message: 'Get boots successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Use boots' })
+  @Post('use-boots')
+  async useBoots(@Request() req) {
+    try {
+      const data = await this.bootsService.useBoots(req.user);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Use boots successfully',
         data: data,
       };
     } catch (e) {
