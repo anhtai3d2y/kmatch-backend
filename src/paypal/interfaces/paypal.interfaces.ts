@@ -1,8 +1,10 @@
 export interface Paypal extends Document {
-  userId: String;
-  package: String;
-  price: String;
-  paymentId: String;
-  token: String;
-  PayerID: String;
+  userId: string;
+  type: string;
+  package: string;
+  price: string;
+  paymentId: string;
+  token: string;
+  PayerID: string;
+  isCompleted: boolean;
 }

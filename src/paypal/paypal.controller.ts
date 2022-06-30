@@ -8,12 +8,13 @@ import {
   Param,
   Query,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { PaypalService } from './paypal.service';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MessageErrorService } from 'src/message-error/message-error';
-import { Response } from 'utils/response';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
 const paypal = require('paypal-rest-sdk');
@@ -46,20 +47,39 @@ export class PaypalController {
     try {
       this.paypalService.create(createPaypalDto, paypal, req.user, res);
     } catch (e) {
-      console.log(e);
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  async getPaymentHistory(@Request() req): Promise<any> {
+    try {
+      const data = await this.paypalService.getPaymentHistory(req.user);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get payment successfully',
+        data: data,
+      };
+    } catch (e) {
       return this.messageError.messageErrorController(e);
     }
   }
 
   @Get('success')
-  async paymentSuccess(@Query() query, @Res() res) {
+  async paymentSuccess(@Query() query, @Res() res: Response) {
     await this.paypalService.paymentSuccess(query);
-    return res.redirect('/api');
+    return res.sendFile('success.html', {
+      root: './src/paypal/return-page',
+    });
   }
 
   @Get('cancel')
-  async paymentCancel(@Query() query, @Res() res) {
+  async paymentCancel(@Query() query, @Res() res: Response) {
     await this.paypalService.paymentCancel(query.token);
-    return res.redirect('/api');
+    return res.sendFile('calcel.html', {
+      root: '/src/paypal/return-page',
+    });
   }
 }
