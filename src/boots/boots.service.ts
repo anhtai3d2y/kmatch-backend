@@ -53,10 +53,10 @@ export class BootsService {
       // userBoots.boots = Date.now();
       const bootsPlus = 30 * 60 * 1000;
       let bootsTime;
-      if (userBoots && userBoots.boots && userBoots.boots < Date.now()) {
+      if (userBoots && userBoots?.boots && userBoots?.boots < Date.now()) {
         bootsTime = Date.now();
       } else {
-        bootsTime = userBoots.boots + bootsPlus;
+        bootsTime = userBoots?.boots + bootsPlus;
       }
       await userBoots.updateOne({
         boots: bootsTime + bootsPlus,
