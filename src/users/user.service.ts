@@ -19,11 +19,20 @@ import { avatarMale } from 'images/avatarMale';
 import { avatarFemale } from 'images/avatarFemale';
 import { nameMale } from 'images/nameMale';
 import { nameFemale } from 'images/nameFemale';
+import { LikeUsers } from 'src/like-users/interfaces/like-users.interfaces';
+import { DislikeUsers } from 'src/dislike-users/interfaces/dislike-users.interfaces';
+import { SuperlikeUsers } from 'src/superlike-users/interfaces/superlike-users.interfaces';
 
 export class UserService {
   constructor(
     @InjectModel('User')
     private readonly userModel: Model<User>,
+    @InjectModel('LikeUsers')
+    private readonly likeUserModel: Model<LikeUsers>,
+    @InjectModel('DislikeUsers')
+    private readonly dislikeUserModel: Model<DislikeUsers>,
+    @InjectModel('SuperlikeUsers')
+    private readonly superlikeUserModel: Model<SuperlikeUsers>,
     private pagingService: PagingService,
     private readonly sendEmail: SendMailService,
   ) {}
@@ -65,14 +74,59 @@ export class UserService {
   }
 
   async getUsersNewsfeed(paging, user): Promise<User | any> {
-    const users = await this.userModel.aggregate([
+    const me = await this.userModel.findOne({ _id: user._id });
+    const myLocation = me.location;
+    const currentYear = new Date().getFullYear();
+    const userLikedIds = await this.getLikedUserIds(user);
+    const userDislikedIds = await this.getDislikedUserIds(user);
+    const userSuperlikedIds = await this.getSuperlikedUserIds(user);
+    const ids = [...userLikedIds, ...userDislikedIds, ...userSuperlikedIds].map(
+      (id) => {
+        return new ObjectID(id);
+      },
+    );
+    let users = await this.userModel.aggregate([
+      {
+        $match: {
+          _id: { $ne: user._id },
+        },
+      },
+      {
+        $match: {
+          _id: { $nin: ids },
+        },
+      },
       {
         $project: {
           password: 0,
           currentHashedRefreshToken: 0,
+          permission: 0,
+          phonenumber: 0,
+          createdAt: 0,
+          updatedAt: 0,
+          verification: 0,
         },
       },
+      // { $limit: 20 },
     ]);
+    users = users.filter((user) => {
+      const age = currentYear - parseInt(user.birthday.split('/')[0]);
+      user.age = age;
+      const distance = this.distance(
+        myLocation.latitude,
+        myLocation.longitude,
+        user.location.latitude,
+        user.location.longitude,
+      );
+      user.distance =
+        distance >= 1
+          ? Math.round(distance * 10) / 10 + ' km'
+          : Math.round(distance * 1000) + ' m';
+      // distance <= 20 && console.log(user.distance);
+      return true;
+    });
+    // console.log('total: ', users.length);
+    paging.limit = 5;
     return this.pagingService.controlPaging(users, paging);
   }
 
@@ -83,7 +137,6 @@ export class UserService {
     fs.unlink(fileName, (err) => {
       if (err) console.log('err: ', err);
     });
-    console.log('fileUploaded: ', fileUploaded);
     const salt = await Bcrypt.genSalt(10);
     const password = await Bcrypt.hash(payload.password, salt);
     const user = await this.userModel.create({
@@ -115,7 +168,7 @@ export class UserService {
       Female: nameFemale,
     };
     const gender = ['Male', 'Female'];
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 3000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
         Math.floor(Math.random() * (2006 - 1992) + 1992) +
@@ -133,6 +186,8 @@ export class UserService {
         avatar[genderPicked][
           Math.floor(Math.random() * avatar[genderPicked].length)
         ];
+      const latitude = 20 + Math.random() * (1.4 - 0.5) + 0.5;
+      const longitude = 100 + Math.random() * (6.4 - 5.2) + 5.2;
       const user = {
         email: `user${i}@gmail.com`,
         name: namePicked,
@@ -144,6 +199,10 @@ export class UserService {
         },
         role: 'Kmatch Basic',
         birthday: birthdayPicked,
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+        },
         phonenumber: phonenumberPicked,
       };
       await this.userModel.create(user);
@@ -161,19 +220,8 @@ export class UserService {
     );
   }
 
-  async updateUser(userInfo: UpdateUserDto, file): Promise<User> {
-    if (!ObjectID.isValid(userInfo.id)) {
-      throw new HttpException(
-        {
-          error: 'ID_NOT_VALID',
-          message: `common.ID_NOT_VALID`,
-          statusCode: HttpStatus.BAD_REQUEST,
-        },
-        400,
-      );
-    }
-
-    const updatedata: any = await this.userModel.findById(userInfo.id);
+  async updateUser(user, userInfo: UpdateUserDto, file): Promise<User> {
+    const updatedata: any = await this.userModel.findById(user._id);
     if (!updatedata) {
       throw new HttpException(
         {
@@ -205,6 +253,12 @@ export class UserService {
     if (userInfo.gender) {
       updatedata.gender = userInfo.gender;
     }
+    if (userInfo.latitude) {
+      updatedata.location.latitude = userInfo.latitude;
+    }
+    if (userInfo.longitude) {
+      updatedata.location.longitude = userInfo.longitude;
+    }
     if (file) {
       if (updatedata.avatar.publicId) {
         await deleteFile(updatedata.avatar.publicId);
@@ -222,10 +276,7 @@ export class UserService {
     }
 
     try {
-      const data = await this.userModel.findByIdAndUpdate(
-        userInfo.id,
-        updatedata,
-      );
+      const data = await this.userModel.findByIdAndUpdate(user._id, updatedata);
       return data;
     } catch (e) {
       if (e.name === 'MongoError') {
@@ -256,10 +307,59 @@ export class UserService {
     });
   }
 
+  async getLikedUserIds(user) {
+    const likeUser = await this.likeUserModel.aggregate([
+      {
+        $match: {
+          userId: user._id.toString(),
+        },
+      },
+      {
+        $group: {
+          _id: '$userId',
+          userLikedId: { $push: '$userLikedId' },
+        },
+      },
+    ]);
+    return likeUser[0] ? likeUser[0]?.userLikedId : [];
+  }
+
+  async getDislikedUserIds(user) {
+    const dislikeUser = await this.dislikeUserModel.aggregate([
+      {
+        $match: {
+          userId: user._id.toString(),
+        },
+      },
+      {
+        $group: {
+          _id: '$userId',
+          userDislikedId: { $push: '$userDislikedId' },
+        },
+      },
+    ]);
+    return dislikeUser[0] ? dislikeUser[0]?.userDislikedId : [];
+  }
+
+  async getSuperlikedUserIds(user) {
+    const superlikeUser = await this.superlikeUserModel.aggregate([
+      {
+        $match: {
+          userId: user._id.toString(),
+        },
+      },
+      {
+        $group: {
+          _id: '$userId',
+          userSuperlikedId: { $push: '$userSuperlikedId' },
+        },
+      },
+    ]);
+    return superlikeUser[0] ? superlikeUser[0]?.userSuperlikedId : [];
+  }
+
   distance(lat1, lon1, lat2, lon2) {
-    // The math module contains a function
-    // named toRadians which converts from
-    // degrees to radians.
+    // Degrees to radians.
     lon1 = (lon1 * Math.PI) / 180;
     lon2 = (lon2 * Math.PI) / 180;
     lat1 = (lat1 * Math.PI) / 180;
@@ -274,11 +374,11 @@ export class UserService {
 
     const c = 2 * Math.asin(Math.sqrt(a));
 
-    // Radius of earth in kilometers. Use 3956
-    // for miles
+    // Radius of earth in kilometers.
+    // Use 3956 for miles.
     const r = 6371;
 
-    // calculate the result
+    // Calculate the result.
     return c * r;
   }
 }

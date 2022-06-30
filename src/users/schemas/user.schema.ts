@@ -29,6 +29,10 @@ export const userSchema = new mongoose.Schema(
     },
     gender: { type: String, enum: Gender, default: 'male' },
     permission: { type: Array, default: [] },
+    location: {
+      latitude: Number,
+      longitude: Number,
+    },
     birthday: { type: String },
     currentHashedRefreshToken: String,
     verification: {

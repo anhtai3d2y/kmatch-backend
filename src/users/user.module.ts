@@ -8,10 +8,20 @@ import { UserService } from './user.service';
 import { PagingService } from '../shared/handling-paging/paging.service';
 import { SendMailService } from 'src/shared/send-mail/send-mail.service';
 import { MessageErrorService } from 'src/message-error/message-error';
+import { likeUsersSchema } from 'src/like-users/schemas/like-users.schema';
+import { dislikeUsersSchema } from 'src/dislike-users/schemas/dislike-users.schema';
+import { superlikeUsersSchema } from 'src/superlike-users/schemas/superlike-users.schema';
 
 @Global()
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'User', schema: userSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: 'User', schema: userSchema },
+      { name: 'LikeUsers', schema: likeUsersSchema },
+      { name: 'DislikeUsers', schema: dislikeUsersSchema },
+      { name: 'SuperlikeUsers', schema: superlikeUsersSchema },
+    ]),
+  ],
   controllers: [UserController],
   providers: [UserService, PagingService, SendMailService, MessageErrorService],
   exports: [UserService],
