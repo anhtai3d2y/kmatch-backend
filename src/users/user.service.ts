@@ -22,6 +22,8 @@ import { nameFemale } from 'images/nameFemale';
 import { LikeUsers } from 'src/like-users/interfaces/like-users.interfaces';
 import { DislikeUsers } from 'src/dislike-users/interfaces/dislike-users.interfaces';
 import { SuperlikeUsers } from 'src/superlike-users/interfaces/superlike-users.interfaces';
+import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
+import { Boots } from 'src/boots/interfaces/boots.interfaces';
 
 export class UserService {
   constructor(
@@ -33,6 +35,10 @@ export class UserService {
     private readonly dislikeUserModel: Model<DislikeUsers>,
     @InjectModel('SuperlikeUsers')
     private readonly superlikeUserModel: Model<SuperlikeUsers>,
+    @InjectModel('SuperlikeStar')
+    private readonly superlikeStarModel: Model<SuperlikeStar>,
+    @InjectModel('Boots')
+    private readonly bootsModel: Model<Boots>,
     private pagingService: PagingService,
     private readonly sendEmail: SendMailService,
   ) {}
@@ -73,9 +79,51 @@ export class UserService {
     return users;
   }
 
+  async getUserProfile(user): Promise<User | any> {
+    const users = await this.userModel.aggregate([
+      {
+        $match: {
+          _id: user._id,
+        },
+      },
+      {
+        $project: {
+          password: 0,
+          currentHashedRefreshToken: 0,
+        },
+      },
+    ]);
+    user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
+    const userStar = await this.superlikeStarModel.findOne({
+      userId: user._id,
+    });
+    const userBoots = await this.bootsModel.findOne({
+      userId: user._id,
+    });
+    if (userStar) {
+      users[0].starAmount = userStar.amount;
+    } else {
+      await this.superlikeStarModel.create({
+        userId: user._id,
+        amount: 0,
+      });
+      users[0].starAmount = 0;
+    }
+    if (userBoots) {
+      users[0].bootsAmount = userBoots.amount;
+    } else {
+      await this.bootsModel.create({
+        userId: user._id,
+        amount: 0,
+      });
+      users[0].bootsAmount = 0;
+    }
+    return users;
+  }
+
   async getUsersNewsfeed(paging, user): Promise<User | any> {
     const me = await this.userModel.findOne({ _id: user._id });
-    const myLocation = me.location;
+    const myLocation = me.mylocation;
     const currentYear = new Date().getFullYear();
     const userLikedIds = await this.getLikedUserIds(user);
     const userDislikedIds = await this.getDislikedUserIds(user);
@@ -107,16 +155,32 @@ export class UserService {
           verification: 0,
         },
       },
-      // { $limit: 20 },
+      { $addFields: { userId: { $toString: '$_id' } } },
+      {
+        $lookup: {
+          from: 'superlikeusers',
+          localField: 'userId',
+          foreignField: 'userSuperlikedId',
+          as: 'superlikes',
+        },
+      },
+      { $addFields: { superlikes: { $size: '$superlikes' } } },
+      {
+        $sort: {
+          boots: -1,
+          superlikes: -1,
+        },
+      },
     ]);
     users = users.filter((user) => {
       const age = currentYear - parseInt(user.birthday.split('/')[0]);
       user.age = age;
+      user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
       const distance = this.distance(
         myLocation.latitude,
         myLocation.longitude,
-        user.location.latitude,
-        user.location.longitude,
+        user.mylocation.latitude,
+        user.mylocation.longitude,
       );
       user.distance =
         distance >= 1
@@ -146,6 +210,11 @@ export class UserService {
         publicId: fileUploaded.public_id,
         secureURL: fileUploaded.secure_url,
       },
+      mylocation: {
+        latitude: parseFloat(payload.latitude),
+        longitude: parseFloat(payload.longitude),
+      },
+      boots: Date.now(),
     });
     const emailPassword = {
       email: payload.email,
@@ -168,7 +237,7 @@ export class UserService {
       Female: nameFemale,
     };
     const gender = ['Male', 'Female'];
-    for (let i = 1; i <= 3000; i++) {
+    for (let i = 1; i <= 10000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
         Math.floor(Math.random() * (2006 - 1992) + 1992) +
@@ -199,11 +268,12 @@ export class UserService {
         },
         role: 'Kmatch Basic',
         birthday: birthdayPicked,
-        location: {
+        mylocation: {
           latitude: latitude,
           longitude: longitude,
         },
         phonenumber: phonenumberPicked,
+        boots: Date.now(),
       };
       await this.userModel.create(user);
       console.log('user #', i);
@@ -254,10 +324,10 @@ export class UserService {
       updatedata.gender = userInfo.gender;
     }
     if (userInfo.latitude) {
-      updatedata.location.latitude = userInfo.latitude;
+      updatedata.mylocation.latitude = userInfo.latitude;
     }
     if (userInfo.longitude) {
-      updatedata.location.longitude = userInfo.longitude;
+      updatedata.mylocation.longitude = userInfo.longitude;
     }
     if (file) {
       if (updatedata.avatar.publicId) {

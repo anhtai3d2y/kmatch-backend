@@ -11,6 +11,8 @@ import { MessageErrorService } from 'src/message-error/message-error';
 import { likeUsersSchema } from 'src/like-users/schemas/like-users.schema';
 import { dislikeUsersSchema } from 'src/dislike-users/schemas/dislike-users.schema';
 import { superlikeUsersSchema } from 'src/superlike-users/schemas/superlike-users.schema';
+import { superlikeStarSchema } from 'src/superlike-star/schemas/superlike-star.schema.';
+import { bootsSchema } from 'src/boots/schemas/boots.schema';
 
 @Global()
 @Module({
@@ -20,6 +22,8 @@ import { superlikeUsersSchema } from 'src/superlike-users/schemas/superlike-user
       { name: 'LikeUsers', schema: likeUsersSchema },
       { name: 'DislikeUsers', schema: dislikeUsersSchema },
       { name: 'SuperlikeUsers', schema: superlikeUsersSchema },
+      { name: 'SuperlikeStar', schema: superlikeStarSchema },
+      { name: 'Boots', schema: bootsSchema },
     ]),
   ],
   controllers: [UserController],

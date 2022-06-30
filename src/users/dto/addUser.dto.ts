@@ -53,6 +53,22 @@ export class AddUserDto {
   @ApiProperty({ type: String, description: 'birthday' })
   birthday: string;
 
+  @IsOptional()
+  @ApiProperty({
+    type: Number,
+    description: 'Your latitude',
+    example: 20.982353845604987,
+  })
+  latitude: number;
+
+  @IsOptional()
+  @ApiProperty({
+    type: Number,
+    description: 'Your longitude',
+    example: 105.78607285199709,
+  })
+  longitude: number;
+
   @ApiProperty({
     type: String,
     format: 'binary',
