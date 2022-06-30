@@ -1,7 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConsoleLogger,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Boots } from 'src/boots/interfaces/boots.interfaces';
+import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
 import { User } from 'src/users/interfaces/user.interfaces';
+import { PackageType } from 'utils/constants/enum/packageType.enum';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
 import { Paypal } from './interfaces/paypal.interfaces';
 
@@ -12,13 +20,18 @@ export class PaypalService {
     private readonly paypalModel: Model<Paypal>,
     @InjectModel('User')
     private readonly userModel: Model<User>,
+    @InjectModel('SuperlikeStar')
+    private readonly superlikeStarModel: Model<SuperlikeStar>,
+    @InjectModel('Boots')
+    private readonly bootsModel: Model<Boots>,
   ) {}
   async create(createPaypalDto: CreatePaypalDto, paypal, user, res) {
     const userId = user._id.toString();
-    let packageType: string = createPaypalDto.package
-      .replace(' ', '_')
+    const packageName: string = createPaypalDto.package
+      .split(' ')
+      .join('_')
       .toUpperCase();
-    var create_payment_json = {
+    const create_payment_json = {
       intent: 'sale',
       payer: {
         payment_method: 'paypal',
@@ -34,7 +47,7 @@ export class PaypalService {
               {
                 name: createPaypalDto.package,
                 sku: '001',
-                price: process.env[packageType],
+                price: process.env[packageName],
                 currency: 'USD',
                 quantity: 1,
               },
@@ -42,7 +55,7 @@ export class PaypalService {
           },
           amount: {
             currency: 'USD',
-            total: process.env[packageType],
+            total: process.env[packageName],
           },
           description: `You are making a payment for ${createPaypalDto.package}`,
         },
@@ -59,10 +72,12 @@ export class PaypalService {
             );
             await this.paypalModel.create({
               userId: userId,
+              type: createPaypalDto.type,
               package: createPaypalDto.package,
-              price: process.env[packageType],
+              price: process.env[packageName],
               paymentId: payment.id,
               token: token,
+              isCompleted: false,
             });
             const data = {
               paymentId: payment.id,
@@ -79,37 +94,88 @@ export class PaypalService {
     });
   }
 
+  async getPaymentHistory(user) {
+    const data = await this.paypalModel.find({
+      userId: user._id,
+    });
+    return data;
+  }
   async paymentSuccess(query) {
     const payment = await this.paypalModel.findOne({
       paymentId: query.paymentId,
       token: query.token,
     });
-    try {
-      const data = await this.userModel.findByIdAndUpdate(payment.userId, {
-        role: payment.package,
-      });
-      return data;
-    } catch (e) {
-      if (e.name === 'MongoError') {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.CONFLICT,
-            message: 'common.CONFLICT',
-            error: 'Conflict',
-          },
-          409,
-        );
-      } else {
-        throw new HttpException(
-          {
-            error: 'ID_NOT_FOUND',
-            message: 'common.ID_NOT_FOUND',
-            statusCode: HttpStatus.NOT_FOUND,
-          },
-          404,
-        );
+    console.log(payment);
+    if (!payment.isCompleted) {
+      try {
+        switch (payment.type) {
+          case PackageType.Role:
+            await this.userModel.findByIdAndUpdate(payment.userId, {
+              role: payment.package,
+            });
+            break;
+          case PackageType.Star:
+            const amountStar = parseInt(payment.package.split(' ')[1]);
+            const superlikeStar = await this.superlikeStarModel.findOne({
+              userId: payment.userId,
+            });
+            if (superlikeStar) {
+              await superlikeStar.updateOne({
+                amount: superlikeStar.amount + amountStar,
+              });
+            } else {
+              await this.bootsModel.create({
+                userId: payment.userId,
+                amount: amountStar,
+              });
+            }
+            break;
+          case PackageType.Boots:
+            const amountBoots = parseInt(payment.package.split(' ')[1]);
+            const boots = await this.bootsModel.findOne({
+              userId: payment.userId,
+            });
+            if (boots) {
+              await boots.updateOne({
+                amount: boots.amount + amountBoots,
+              });
+            } else {
+              await this.bootsModel.create({
+                userId: payment.userId,
+                amount: amountBoots,
+              });
+            }
+            break;
+          default:
+            break;
+        }
+        await payment.updateOne({
+          isCompleted: true,
+        });
+        return;
+      } catch (e) {
+        if (e.name === 'MongoError') {
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.CONFLICT,
+              message: 'common.CONFLICT',
+              error: 'Conflict',
+            },
+            409,
+          );
+        } else {
+          throw new HttpException(
+            {
+              error: 'ID_NOT_FOUND',
+              message: 'common.ID_NOT_FOUND',
+              statusCode: HttpStatus.NOT_FOUND,
+            },
+            404,
+          );
+        }
       }
     }
+    return;
   }
 
   async paymentCancel(token) {

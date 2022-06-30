@@ -24,6 +24,7 @@ import { TransformInterceptor } from 'common/interceptors/transform.interceptor'
 import { Premission1Module } from './premission1/premission1.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { VerificationModule } from './verification/verification.module';
+import { BootsModule } from './boots/boots.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { VerificationModule } from './verification/verification.module';
     SuperlikeStarModule,
     Premission1Module,
     VerificationModule,
+    BootsModule,
   ],
   controllers: [AppController, UserController],
   providers: [

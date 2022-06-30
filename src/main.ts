@@ -26,6 +26,7 @@ async function bootstrap() {
     .addTag('dislike-users')
     .addTag('superlike-users')
     .addTag('superlike-star')
+    .addTag('boots')
     .addTag('matches')
     .addTag('threads')
     .addTag('messages')
