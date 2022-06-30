@@ -1,4 +1,4 @@
-export interface User {
+export interface User extends Document {
   _id: string;
   name: string;
   email: string;
@@ -7,10 +7,11 @@ export interface User {
   avatar: string;
   phonenumber: string;
   permission: string[];
-  location: {
+  mylocation: {
     latitude: number;
     longitude: number;
   };
+  boots: number;
   currentHashedRefreshToken: string;
   verification: {
     code: string;

@@ -79,6 +79,36 @@ export class UserController {
     }
   }
 
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile' })
+  async getUserProfile(@Request() req): Promise<Response> {
+    try {
+      const data: any = await this.userService.getUserProfile(req.user);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get successfully',
+        data: data,
+      };
+    } catch (e) {
+      const message = e.response?.message;
+      let messageError: any = message;
+      if (e.response?.error === 'ID_NOT_FOUND') {
+        messageError = message;
+      } else if (e.response?.error === 'Conflict') {
+        messageError = message;
+      } else {
+        messageError = 'A system error has occurred!';
+      }
+      return {
+        success: false,
+        message: messageError,
+        error: 'Unprocessable Entity',
+      };
+    }
+  }
+
   @Get('news-feed')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
@@ -94,7 +124,7 @@ export class UserController {
       );
       return {
         statusCode: HttpStatus.OK,
-        message: 'Get successfully',
+        message: 'Get newsfeed successfully',
         data: data,
       };
     } catch (e) {
