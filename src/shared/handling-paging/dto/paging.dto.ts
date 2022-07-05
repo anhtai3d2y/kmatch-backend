@@ -11,7 +11,7 @@ export class PagingDto {
     type: String,
     description: 'sortBy',
     required: false,
-    example: '{"name": 1, "age": -1}',
+    example: '{"superlikeStar": -1}',
   })
   @IsOptional()
   sortBy: string;
