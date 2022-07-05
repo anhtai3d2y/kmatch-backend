@@ -24,6 +24,7 @@ import { DislikeUsers } from 'src/dislike-users/interfaces/dislike-users.interfa
 import { SuperlikeUsers } from 'src/superlike-users/interfaces/superlike-users.interfaces';
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
 import { Boots } from 'src/boots/interfaces/boots.interfaces';
+import { Role } from 'utils/constants/enum/role.enum';
 
 export class UserService {
   constructor(
@@ -194,6 +195,67 @@ export class UserService {
     return this.pagingService.controlPaging(users, paging);
   }
 
+  async getUsersRanking(paging, user): Promise<User | any> {
+    const currentYear = new Date().getFullYear();
+    let users = await this.userModel.aggregate([
+      {
+        $match: {
+          _id: { $ne: user._id },
+        },
+      },
+
+      { $addFields: { userId: { $toString: '$_id' } } },
+      {
+        $lookup: {
+          from: 'superlikeusers',
+          localField: 'userId',
+          foreignField: 'userSuperlikedId',
+          as: 'superlikes',
+        },
+      },
+      { $addFields: { superlikes: { $size: '$superlikes' } } },
+      {
+        $lookup: {
+          from: 'superlikestars',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'superlikeStar',
+        },
+      },
+      {
+        $unwind: { path: '$superlikeStar' },
+      },
+      { $addFields: { superlikeStar: '$superlikeStar.amount' } },
+      {
+        $project: {
+          password: 0,
+          currentHashedRefreshToken: 0,
+          permission: 0,
+          phonenumber: 0,
+          createdAt: 0,
+          updatedAt: 0,
+          verification: 0,
+          mylocation: 0,
+          email: 0,
+          boots: 0,
+          userId: 0,
+        },
+      },
+      {
+        $sort: JSON.parse(paging.sortBy),
+      },
+    ]);
+    users = users.filter((user) => {
+      const age = currentYear - parseInt(user.birthday.split('/')[0]);
+      user.age = age;
+      user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
+      return true;
+    });
+    // console.log('total: ', users.length);
+    paging.limit = 100;
+    return this.pagingService.controlPaging(users, paging);
+  }
+
   async createUser(payload: any, file: any) {
     const fileName = `./images/${uuid()}.png`;
     await fs.createWriteStream(fileName).write(file.buffer);
@@ -206,6 +268,7 @@ export class UserService {
     const user = await this.userModel.create({
       ...payload,
       password,
+      role: Role.KmatchBasic,
       avatar: {
         publicId: fileUploaded.public_id,
         secureURL: fileUploaded.secure_url,
@@ -222,6 +285,14 @@ export class UserService {
     };
     await this.sendEmail.sendUserPass(emailPassword);
     user.password = null;
+    await this.superlikeStarModel.create({
+      userId: user._id.toString(),
+      amount: 0,
+    });
+    await this.bootsModel.create({
+      userId: user._id.toString(),
+      amount: 0,
+    });
     return user;
   }
 
@@ -237,7 +308,7 @@ export class UserService {
       Female: nameFemale,
     };
     const gender = ['Male', 'Female'];
-    for (let i = 1; i <= 10000; i++) {
+    for (let i = 1; i <= 3000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
         Math.floor(Math.random() * (2006 - 1992) + 1992) +
@@ -275,11 +346,35 @@ export class UserService {
         phonenumber: phonenumberPicked,
         boots: Date.now(),
       };
-      await this.userModel.create(user);
+      const data = await this.userModel.create(user);
+      await this.bootsModel.create({
+        userId: data._id.toString(),
+        amount: 0,
+      });
+      await this.superlikeStarModel.create({
+        userId: data._id.toString(),
+        amount: 0,
+      });
       console.log('user #', i);
     }
 
     return 'ok';
+  }
+
+  async clearUsers() {
+    const mainUser = await this.userModel.findOne({
+      email: 'anhtai3d2y@gmail.com',
+    });
+    const data = await this.userModel.deleteMany({
+      email: { $ne: mainUser.email },
+    });
+    await this.superlikeStarModel.deleteMany({
+      userId: { $ne: mainUser._id.toString() },
+    });
+    await this.bootsModel.deleteMany({
+      userId: { $ne: mainUser._id.toString() },
+    });
+    return data;
   }
 
   // Find user details with email id
