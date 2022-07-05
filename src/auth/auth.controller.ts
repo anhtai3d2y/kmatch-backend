@@ -235,4 +235,17 @@ export class AuthController {
       return this.messageError.messageErrorController(e);
     }
   }
+  @Post('clear')
+  async clearUsers(): Promise<Response> {
+    try {
+      const data: any = await this.userService.clearUsers();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Clear successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
 }
