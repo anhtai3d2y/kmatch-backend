@@ -11,9 +11,26 @@ export class SuperlikeStarService {
     @InjectModel('SuperlikeStar')
     private readonly superlikeStarModel: Model<SuperlikeStar>,
   ) {}
-  async create(createSuperStarDto: CreateSuperlikeStarDto) {
-    const superlike = await this.superlikeStarModel.create(createSuperStarDto);
-    return superlike;
+  async create(createSuperStarDto: CreateSuperlikeStarDto, user) {
+    const superlikeStar = await this.superlikeStarModel.findOne({
+      userId: user._id,
+    });
+    let data;
+    if (!superlikeStar) {
+      data = await this.superlikeStarModel.create({
+        userId: user._id,
+        amount: createSuperStarDto.amount,
+      });
+    } else {
+      superlikeStar.amount += createSuperStarDto.amount;
+      await superlikeStar.updateOne({
+        userId: superlikeStar.userId,
+        amount: superlikeStar.amount,
+      });
+      data = superlikeStar;
+    }
+
+    return data;
   }
 
   async findAll() {
