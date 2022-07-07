@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { formatDate } from 'utils/util';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { FilterMessageDto } from './dto/filter-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
@@ -34,6 +35,14 @@ export class MessagesService {
         $sort: { createdAt: -1 },
       },
     ]);
+    for (let i = 0; i < message.length; i++) {
+      if (message[i].senderId === userId) {
+        message[i].mine = true;
+      } else {
+        message[i].mine = false;
+      }
+      message[i].time = formatDate(message[i].createdAt);
+    }
     return message;
   }
 }

@@ -26,6 +26,8 @@ export class ThreadsController {
     private readonly messageError: MessageErrorService,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add new thread' })
   @ApiBody({
     type: CreateThreadDto,
@@ -33,9 +35,15 @@ export class ThreadsController {
     description: 'Add new thread',
   })
   @Post()
-  async create(@Body() createThreadDto: CreateThreadDto): Promise<Response> {
+  async create(
+    @Body() createThreadDto: CreateThreadDto,
+    @Request() req,
+  ): Promise<Response> {
     try {
-      const data: any = await this.threadsService.create(createThreadDto);
+      const data: any = await this.threadsService.create(
+        createThreadDto,
+        req.user,
+      );
       return {
         statusCode: HttpStatus.OK,
         message: 'Create successfully',
