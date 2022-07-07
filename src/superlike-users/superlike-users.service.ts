@@ -18,7 +18,6 @@ export class SuperlikeUsersService {
     const superlikeStar = await this.superlikeStarModel.findOne({
       userId: userId,
     });
-    console.log(superlikeStar);
     if (superlikeStar && superlikeStar.amount > 0) {
       const superlike = await this.superlikeUserModel.create({
         userId: userId,

@@ -34,6 +34,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Permission } from 'common/decorators/roles.decorator';
 import { ActionEnum } from 'utils/constants/enum/action.enum';
 import { PagingDto } from 'src/shared/handling-paging/dto/paging.dto';
+import { NewsFeedFilterDto } from './dto/newsfeed-filter.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -115,11 +116,11 @@ export class UserController {
   @ApiOperation({ summary: 'Get users newsfeed' })
   async getUsersNewsfeed(
     @Request() req,
-    @Query() paging: PagingDto,
+    @Query() filer: NewsFeedFilterDto,
   ): Promise<Response> {
     try {
       const data: any = await this.userService.getUsersNewsfeed(
-        paging,
+        filer,
         req.user,
       );
       return {
