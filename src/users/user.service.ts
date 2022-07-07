@@ -25,6 +25,7 @@ import { SuperlikeUsers } from 'src/superlike-users/interfaces/superlike-users.i
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
 import { Boots } from 'src/boots/interfaces/boots.interfaces';
 import { Role } from 'utils/constants/enum/role.enum';
+import { filter } from 'rxjs';
 
 export class UserService {
   constructor(
@@ -122,7 +123,12 @@ export class UserService {
     return users;
   }
 
-  async getUsersNewsfeed(paging, user): Promise<User | any> {
+  async getUsersNewsfeed(filter, user): Promise<User | any> {
+    const genderRequired = filter.gender;
+    const minAgeRequired = parseInt(filter.minAge);
+    const maxAgeRequired = parseInt(filter.maxAge);
+    const distanceRequired = parseInt(filter.distance);
+
     const me = await this.userModel.findOne({ _id: user._id });
     const myLocation = me.mylocation;
     const currentYear = new Date().getFullYear();
@@ -183,16 +189,18 @@ export class UserService {
         user.mylocation.latitude,
         user.mylocation.longitude,
       );
+      const isGenderOk =
+        genderRequired === 'Both' || genderRequired === user.gender;
+      const isAgeOk = age >= minAgeRequired && age <= maxAgeRequired;
+      const isDistanceOk = distance <= distanceRequired;
       user.distance =
         distance >= 1
           ? Math.round(distance * 10) / 10 + ' km'
           : Math.round(distance * 1000) + ' m';
-      // distance <= 20 && console.log(user.distance);
-      return true;
+      return isGenderOk && isAgeOk && isDistanceOk;
     });
-    // console.log('total: ', users.length);
-    paging.limit = 5;
-    return this.pagingService.controlPaging(users, paging);
+    filter.limit = 5;
+    return this.pagingService.controlPaging(users, filter);
   }
 
   async getUsersRanking(paging, user): Promise<User | any> {
@@ -302,12 +310,14 @@ export class UserService {
     const avatar = {
       Male: avatarMale,
       Female: avatarFemale,
+      Other: [...avatarMale, ...avatarFemale],
     };
     const name = {
       Male: nameMale,
       Female: nameFemale,
+      Other: [...nameMale, ...nameFemale],
     };
-    const gender = ['Male', 'Female'];
+    const gender = ['Male', 'Female', 'Other'];
     for (let i = 1; i <= 3000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
@@ -326,6 +336,9 @@ export class UserService {
         avatar[genderPicked][
           Math.floor(Math.random() * avatar[genderPicked].length)
         ];
+      const bootsPicked = Math.floor(Math.random() * (7200000 - 0) + 0);
+      const bootsAmount = Math.floor(Math.random() * (50 - 0) + 0);
+      const superlikeStarAmount = Math.floor(Math.random() * (50 - 0) + 0);
       const latitude = 20 + Math.random() * (1.4 - 0.5) + 0.5;
       const longitude = 100 + Math.random() * (6.4 - 5.2) + 5.2;
       const user = {
@@ -344,16 +357,16 @@ export class UserService {
           longitude: longitude,
         },
         phonenumber: phonenumberPicked,
-        boots: Date.now(),
+        boots: Date.now() + bootsPicked,
       };
       const data = await this.userModel.create(user);
       await this.bootsModel.create({
         userId: data._id.toString(),
-        amount: 0,
+        amount: bootsAmount,
       });
       await this.superlikeStarModel.create({
         userId: data._id.toString(),
-        amount: 0,
+        amount: superlikeStarAmount,
       });
       console.log('user #', i);
     }
