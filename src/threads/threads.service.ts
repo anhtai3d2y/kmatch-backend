@@ -1,18 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { formatDate } from 'utils/util';
 import { CreateThreadDto } from './dto/create-thread.dto';
 import { UpdateThreadDto } from './dto/update-thread.dto';
 import { Threads } from './interfaces/threads.interfaces';
-
 @Injectable()
 export class ThreadsService {
   constructor(
     @InjectModel('Threads')
     private readonly threadsModel: Model<Threads>,
   ) {}
-  async create(createThreadDto: CreateThreadDto) {
-    const thread = await this.threadsModel.create(createThreadDto);
+  async create(createThreadDto: CreateThreadDto, user: any) {
+    const thread = await this.threadsModel.create({
+      userId: user._id,
+      otherUserId: createThreadDto.otherUserId,
+    });
     return thread;
   }
 
@@ -64,6 +67,12 @@ export class ThreadsService {
         },
       },
       {
+        $unwind: '$user',
+      },
+      {
+        $unwind: '$otherUser',
+      },
+      {
         $lookup: {
           from: 'messages',
           localField: 'threadId',
@@ -82,6 +91,19 @@ export class ThreadsService {
         },
       },
     ]);
+    for (let i = 0; i < thread.length; i++) {
+      if (thread[i].user._id.toString() !== userId) {
+        const tempUserId = thread[i].userId;
+        thread[i].userId = thread[i].otherUserId;
+        thread[i].otherUserId = tempUserId;
+        const tempUser = thread[i].user;
+        thread[i].user = thread[i].otherUser;
+        thread[i].otherUser = tempUser;
+      }
+      if (thread[i].messages) {
+        thread[i].messages.time = formatDate(thread[i].messages.createdAt);
+      }
+    }
     return thread;
   }
 
@@ -96,7 +118,7 @@ export class ThreadsService {
     return 'Update';
   }
 
-  async remove(id: string) {
+  async remove(id: any) {
     return 'Delete';
   }
 }

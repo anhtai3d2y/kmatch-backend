@@ -120,6 +120,9 @@ export class UserService {
       });
       users[0].bootsAmount = 0;
     }
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - parseInt(users[0].birthday.split('/')[0]);
+    users[0].age = age;
     return users;
   }
 

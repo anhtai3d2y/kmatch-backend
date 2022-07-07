@@ -189,7 +189,7 @@ export class AuthController {
       const data = await this.authService.resetPassword(resetPassword);
       return {
         statusCode: HttpStatus.OK,
-        message: 'reset password successfullys',
+        message: 'Reset password successfully!',
         data: data,
       };
     } catch (e) {
@@ -214,7 +214,7 @@ export class AuthController {
       );
       return {
         statusCode: HttpStatus.OK,
-        message: 'change password successfullys',
+        message: 'Change password successfully!',
         data: data,
       };
     } catch (e) {
