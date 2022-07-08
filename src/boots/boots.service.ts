@@ -50,13 +50,12 @@ export class BootsService {
       const userBoots = await this.userModel.findOne({
         _id: user._id,
       });
-      // userBoots.boots = Date.now();
       const bootsPlus = 30 * 60 * 1000;
       let bootsTime;
-      if (userBoots && userBoots.boots && userBoots.boots < Date.now()) {
+      if (userBoots && userBoots.boots < Date.now()) {
         bootsTime = Date.now();
       } else {
-        bootsTime = userBoots.boots + bootsPlus;
+        bootsTime = userBoots.boots;
       }
       await userBoots.updateOne({
         boots: bootsTime + bootsPlus,
