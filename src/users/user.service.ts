@@ -95,7 +95,7 @@ export class UserService {
         },
       },
     ]);
-    user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
+    users[0].boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
     const userStar = await this.superlikeStarModel.findOne({
       userId: user._id,
     });
