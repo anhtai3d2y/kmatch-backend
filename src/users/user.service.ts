@@ -11,7 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateUserDto } from './dto/updateUser.dto';
-import { uuid } from '../../utils/util';
+import { calculateAge, uuid } from '../../utils/util';
 import * as fs from 'fs';
 import { deleteFile, uploadFile } from 'utils/cloudinary';
 import { SendMailService } from 'src/shared/send-mail/send-mail.service';
@@ -120,9 +120,7 @@ export class UserService {
       });
       users[0].bootsAmount = 0;
     }
-    const currentYear = new Date().getFullYear();
-    const age = currentYear - parseInt(users[0].birthday.split('/')[0]);
-    users[0].age = age;
+    users[0].age = calculateAge(users[0].birthday);
     return users;
   }
 
@@ -134,7 +132,6 @@ export class UserService {
 
     const me = await this.userModel.findOne({ _id: user._id });
     const myLocation = me.mylocation;
-    const currentYear = new Date().getFullYear();
     const userLikedIds = await this.getLikedUserIds(user);
     const userDislikedIds = await this.getDislikedUserIds(user);
     const userSuperlikedIds = await this.getSuperlikedUserIds(user);
@@ -183,7 +180,7 @@ export class UserService {
       },
     ]);
     users = users.filter((user) => {
-      const age = currentYear - parseInt(user.birthday.split('/')[0]);
+      const age = calculateAge(user.birthday);
       user.age = age;
       user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
       const distance = this.distance(
