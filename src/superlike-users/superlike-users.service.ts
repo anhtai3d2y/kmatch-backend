@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
+import { calculateAge } from 'utils/util';
 import { CreateSuperlikeUserDto } from './dto/create-superlike-user.dto';
 import { SuperlikeUsers } from './interfaces/superlike-users.interfaces';
 
@@ -69,7 +70,15 @@ export class SuperlikeUsersService {
       {
         $unwind: '$user',
       },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
     ]);
+    for (let i = 0; i < superlike.length; i++) {
+      superlike[i].user.age = calculateAge(superlike[i].user.birthday);
+    }
     return superlike;
   }
 
