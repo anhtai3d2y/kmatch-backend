@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { calculateAge } from 'utils/util';
 import { CreateDislikeUserDto } from './dto/create-dislike-user.dto';
 import { DislikeUsers } from './interfaces/dislike-users.interfaces';
 
@@ -49,7 +50,15 @@ export class DislikeUsersService {
       {
         $unwind: '$user',
       },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
     ]);
+    for (let i = 0; i < dislike.length; i++) {
+      dislike[i].user.age = calculateAge(dislike[i].user.birthday);
+    }
     return dislike;
   }
 
