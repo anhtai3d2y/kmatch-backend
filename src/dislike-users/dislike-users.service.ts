@@ -13,10 +13,16 @@ export class DislikeUsersService {
   ) {}
   async create(createDislikeUserDto: CreateDislikeUserDto, user) {
     const userId = user._id.toString();
-    const dislike = await this.dislikeUserModel.create({
+    let dislike = await this.dislikeUserModel.findOne({
       userId: userId,
       userDislikedId: createDislikeUserDto.userDislikedId,
     });
+    if (!dislike) {
+      dislike = await this.dislikeUserModel.create({
+        userId: userId,
+        userDislikedId: createDislikeUserDto.userDislikedId,
+      });
+    }
     return dislike;
   }
 

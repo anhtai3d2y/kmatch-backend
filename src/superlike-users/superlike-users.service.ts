@@ -19,17 +19,24 @@ export class SuperlikeUsersService {
   ) {}
   async create(createSuperlikeUserDto: CreateSuperlikeUserDto, user) {
     const userId = user._id.toString();
+    let isMatched = false;
+    let superlike = await this.superlikeUserModel.findOne({
+      userId: userId,
+      userSuperlikedId: createSuperlikeUserDto.userSuperlikedId,
+    });
     const superlikeStar = await this.superlikeStarModel.findOne({
       userId: userId,
     });
     if (superlikeStar && superlikeStar.amount > 0) {
-      const superlike = await this.superlikeUserModel.create({
-        userId: userId,
-        userSuperlikedId: createSuperlikeUserDto.userSuperlikedId,
-      });
-      await superlikeStar.updateOne({
-        amount: superlikeStar.amount - 1,
-      });
+      if (!superlike) {
+        superlike = await this.superlikeUserModel.create({
+          userId: userId,
+          userSuperlikedId: createSuperlikeUserDto.userSuperlikedId,
+        });
+        await superlikeStar.updateOne({
+          amount: superlikeStar.amount - 1,
+        });
+      }
       const likeMatched = await this.likeUserModel.findOne({
         userId: createSuperlikeUserDto.userSuperlikedId,
         userLikedId: userId,
@@ -38,7 +45,7 @@ export class SuperlikeUsersService {
         userId: createSuperlikeUserDto.userSuperlikedId,
         userSuperlikedId: userId,
       });
-      let isMatched = false;
+      isMatched = false;
       if (likeMatched || superlikeMatched) {
         isMatched = true;
       }
