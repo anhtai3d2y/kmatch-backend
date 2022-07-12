@@ -108,6 +108,13 @@ export class ThreadsService {
             i
           ].messages.messageBody = `You: ${thread[i].messages.messageBody}`;
         }
+      } else {
+        thread[i].messages = {
+          messageType: 'Text',
+          messageBody: 'Say hello!',
+          createdAt: thread[i].createdAt,
+        };
+        thread[i].messages.time = formatDate(thread[i].messages.createdAt);
       }
     }
     return thread;
