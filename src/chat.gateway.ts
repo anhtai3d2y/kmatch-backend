@@ -20,8 +20,7 @@ export class ChatGateway {
 
   @SubscribeMessage('events')
   handleEvent(client: Socket, data) {
-    console.log('data: ', data.id, data.message);
-    this.server.emit(data.id, data.message);
+    this.server.emit(data.emitId, data.message);
     return data;
   }
 }

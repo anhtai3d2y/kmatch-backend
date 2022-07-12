@@ -100,8 +100,14 @@ export class ThreadsService {
         thread[i].user = thread[i].otherUser;
         thread[i].otherUser = tempUser;
       }
+      thread[i].timeCreated = formatDate(thread[i].createdAt);
       if (thread[i].messages) {
         thread[i].messages.time = formatDate(thread[i].messages.createdAt);
+        if (thread[i].user._id.toString() === thread[i].messages.senderId) {
+          thread[
+            i
+          ].messages.messageBody = `You: ${thread[i].messages.messageBody}`;
+        }
       }
     }
     return thread;
