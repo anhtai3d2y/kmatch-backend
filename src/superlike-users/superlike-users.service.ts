@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { LikeUsers } from 'src/like-users/interfaces/like-users.interfaces';
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
 import { calculateAge } from 'utils/util';
 import { CreateSuperlikeUserDto } from './dto/create-superlike-user.dto';
@@ -11,6 +12,8 @@ export class SuperlikeUsersService {
   constructor(
     @InjectModel('SuperlikeUsers')
     private readonly superlikeUserModel: Model<SuperlikeUsers>,
+    @InjectModel('LikeUsers')
+    private readonly likeUserModel: Model<LikeUsers>,
     @InjectModel('SuperlikeStar')
     private readonly superlikeStarModel: Model<SuperlikeStar>,
   ) {}
@@ -27,7 +30,24 @@ export class SuperlikeUsersService {
       await superlikeStar.updateOne({
         amount: superlikeStar.amount - 1,
       });
-      return superlike;
+      const likeMatched = await this.likeUserModel.findOne({
+        userId: createSuperlikeUserDto.userSuperlikedId,
+        userLikedId: userId,
+      });
+      const superlikeMatched = await this.superlikeUserModel.findOne({
+        userId: createSuperlikeUserDto.userSuperlikedId,
+        userSuperlikedId: userId,
+      });
+      let isMatched = false;
+      if (likeMatched || superlikeMatched) {
+        isMatched = true;
+      }
+      return {
+        userId: superlike.userId,
+        userLikedId: superlike.userSuperlikedId,
+        _id: superlike._id,
+        isMatched: isMatched,
+      };
     } else {
       throw new HttpException(
         {
