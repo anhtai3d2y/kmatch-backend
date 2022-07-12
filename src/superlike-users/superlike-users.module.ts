@@ -5,10 +5,12 @@ import { superlikeUsersSchema } from './schemas/superlike-users.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessageErrorModule } from 'src/message-error/message-error.module';
 import { superlikeStarSchema } from 'src/superlike-star/schemas/superlike-star.schema.';
+import { likeUsersSchema } from 'src/like-users/schemas/like-users.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'SuperlikeUsers', schema: superlikeUsersSchema },
+      { name: 'LikeUsers', schema: likeUsersSchema },
       { name: 'SuperlikeStar', schema: superlikeStarSchema },
     ]),
     MessageErrorModule,

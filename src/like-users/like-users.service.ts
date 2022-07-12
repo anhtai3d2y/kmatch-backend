@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { SuperlikeUsers } from 'src/superlike-users/interfaces/superlike-users.interfaces';
 import { calculateAge } from 'utils/util';
 import { CreateLikeUserDto } from './dto/create-like-user.dto';
 import { LikeUsers } from './interfaces/like-users.interfaces';
@@ -10,6 +11,8 @@ export class LikeUsersService {
   constructor(
     @InjectModel('LikeUsers')
     private readonly likeUserModel: Model<LikeUsers>,
+    @InjectModel('SuperlikeUsers')
+    private readonly superlikeUserModel: Model<SuperlikeUsers>,
   ) {}
   async create(createLikeUserDto: CreateLikeUserDto, user) {
     const userId = user._id.toString();
@@ -17,7 +20,24 @@ export class LikeUsersService {
       userId: userId,
       userLikedId: createLikeUserDto.userLikedId,
     });
-    return like;
+    const likeMatched = await this.likeUserModel.findOne({
+      userId: createLikeUserDto.userLikedId,
+      userLikedId: userId,
+    });
+    const superlikeMatched = await this.superlikeUserModel.findOne({
+      userId: createLikeUserDto.userLikedId,
+      userSuperlikedId: userId,
+    });
+    let isMatched = false;
+    if (likeMatched || superlikeMatched) {
+      isMatched = true;
+    }
+    return {
+      userId: like.userId,
+      userLikedId: like.userLikedId,
+      _id: like._id,
+      isMatched: isMatched,
+    };
   }
 
   async findAll(user) {
