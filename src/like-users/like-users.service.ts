@@ -16,10 +16,17 @@ export class LikeUsersService {
   ) {}
   async create(createLikeUserDto: CreateLikeUserDto, user) {
     const userId = user._id.toString();
-    const like = await this.likeUserModel.create({
+    let isMatched = false;
+    let like = await this.likeUserModel.findOne({
       userId: userId,
       userLikedId: createLikeUserDto.userLikedId,
     });
+    if (!like) {
+      like = await this.likeUserModel.create({
+        userId: userId,
+        userLikedId: createLikeUserDto.userLikedId,
+      });
+    }
     const likeMatched = await this.likeUserModel.findOne({
       userId: createLikeUserDto.userLikedId,
       userLikedId: userId,
@@ -28,7 +35,6 @@ export class LikeUsersService {
       userId: createLikeUserDto.userLikedId,
       userSuperlikedId: userId,
     });
-    let isMatched = false;
     if (likeMatched || superlikeMatched) {
       isMatched = true;
     }
