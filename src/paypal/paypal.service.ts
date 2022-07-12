@@ -97,6 +97,7 @@ export class PaypalService {
   async getPaymentHistory(user) {
     const data = await this.paypalModel.find({
       userId: user._id,
+      isCompleted: true,
     });
     return data;
   }
