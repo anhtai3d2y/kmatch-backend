@@ -7,6 +7,8 @@ import {
   IsString,
   ValidateIf,
   Matches,
+  MinLength,
+  MaxLength,
 } from 'class-validator';
 import { Gender } from 'utils/constants/enum/gender.enum';
 import { Role } from 'utils/constants/enum/role.enum';
@@ -35,6 +37,8 @@ export class AddUserDto {
 
   @IsOptional()
   @IsString()
+  @MinLength(6, { message: '6' })
+  @MaxLength(30, { message: '30' })
   @ApiProperty({ type: String, description: 'phonenumber' })
   phonenumber: string;
 
