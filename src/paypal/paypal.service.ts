@@ -105,7 +105,6 @@ export class PaypalService {
       paymentId: query.paymentId,
       token: query.token,
     });
-    console.log(payment);
     if (!payment.isCompleted) {
       try {
         switch (payment.type) {
@@ -115,7 +114,7 @@ export class PaypalService {
             });
             break;
           case PackageType.Star:
-            const amountStar = parseInt(payment.package.split(' ')[1]);
+            const amountStar = parseInt(payment.package.split(' ')[2]);
             const superlikeStar = await this.superlikeStarModel.findOne({
               userId: payment.userId,
             });
