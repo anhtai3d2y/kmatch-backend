@@ -32,7 +32,7 @@ export class MessagesService {
         $match: { threadId: filterMessageDto.threadId },
       },
       {
-        $sort: { createdAt: -1 },
+        $sort: { createdAt: 1 },
       },
     ]);
     for (let i = 0; i < message.length; i++) {
