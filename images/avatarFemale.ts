@@ -29,7 +29,6 @@ export const avatarFemale = [
   'dfplgokbd2xjwttqg52y',
   'ldmusfieu9lisiixtlap',
   'mifvrekkmyihfqmwicgd',
-  'blygkhzdjdmcilf9fxzs',
   'dxmep6nyqxnxl3vkqrpt',
   'pqvcnwf8nwiels2ujz5w',
   'pjmmvcelr74zd8pfzad5',
