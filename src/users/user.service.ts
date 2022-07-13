@@ -335,8 +335,8 @@ export class UserService {
           Math.floor(Math.random() * avatar[genderPicked].length)
         ];
       const bootsPicked = Math.floor(Math.random() * (7200000 - 0) + 0);
-      const bootsAmount = Math.floor(Math.random() * (50 - 0) + 0);
-      const superlikeStarAmount = Math.floor(Math.random() * (50 - 0) + 0);
+      const bootsAmount = Math.floor(Math.random() * (10000 - 0) + 0);
+      const superlikeStarAmount = Math.floor(Math.random() * (10000 - 0) + 0);
       const latitude = 20 + Math.random() * (1.4 - 0.5) + 0.5;
       const longitude = 100 + Math.random() * (6.4 - 5.2) + 5.2;
       const user = {
@@ -346,7 +346,7 @@ export class UserService {
         password,
         avatar: {
           publicId: avatarPicked,
-          secureURL: `https://res.cloudinary.com/anhtai3d2y/image/upload/v1652849219/kmatch/${avatarPicked}.jpg`,
+          secureURL: `https://res.cloudinary.com/anhtai3d2y/image/upload/q_20/v1652849219/kmatch/${avatarPicked}.jpg`,
         },
         role: 'Kmatch Basic',
         birthday: birthdayPicked,
