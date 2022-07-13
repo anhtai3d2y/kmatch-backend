@@ -203,15 +203,9 @@ export class UserService {
     return this.pagingService.controlPaging(users, filter);
   }
 
-  async getUsersRanking(paging, user): Promise<User | any> {
+  async getUsersRanking(paging, userRequest): Promise<User | any> {
     const currentYear = new Date().getFullYear();
     let users = await this.userModel.aggregate([
-      {
-        $match: {
-          _id: { $ne: user._id },
-        },
-      },
-
       { $addFields: { userId: { $toString: '$_id' } } },
       {
         $lookup: {
@@ -257,9 +251,13 @@ export class UserService {
       const age = currentYear - parseInt(user.birthday.split('/')[0]);
       user.age = age;
       user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
-      return true;
+      user.isMe = user._id.toString() === userRequest._id.toString();
+      if (paging.sortBy === '{"superlikes": -1, "superlikeStar": -1}') {
+        return user.superlikes > 0;
+      } else {
+        return user.superlikeStar > 0;
+      }
     });
-    // console.log('total: ', users.length);
     paging.limit = 100;
     return this.pagingService.controlPaging(users, paging);
   }
@@ -418,18 +416,21 @@ export class UserService {
     if (userInfo.email) {
       updatedata.email = userInfo.email;
     }
-    if (userInfo.password) {
-      const salt = await Bcrypt.genSalt(10);
-      updatedata.password = await Bcrypt.hash(userInfo.password, salt);
-    }
-    if (userInfo.role) {
-      updatedata.role = userInfo.role;
-    }
+    // if (userInfo.password) {
+    //   const salt = await Bcrypt.genSalt(10);
+    //   updatedata.password = await Bcrypt.hash(userInfo.password, salt);
+    // }
+    // if (userInfo.role) {
+    //   updatedata.role = userInfo.role;
+    // }
     if (userInfo.phonenumber) {
       updatedata.phonenumber = userInfo.phonenumber;
     }
     if (userInfo.gender) {
       updatedata.gender = userInfo.gender;
+    }
+    if (userInfo.birthday) {
+      updatedata.birthday = userInfo.birthday;
     }
     if (userInfo.latitude) {
       updatedata.mylocation.latitude = userInfo.latitude;
