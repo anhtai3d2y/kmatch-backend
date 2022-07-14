@@ -2,7 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { LikeUsers } from 'src/like-users/interfaces/like-users.interfaces';
+import { Matches } from 'src/matches/interfaces/matches.interfaces';
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
+import { User } from 'src/users/interfaces/user.interfaces';
 import { calculateAge } from 'utils/util';
 import { CreateSuperlikeUserDto } from './dto/create-superlike-user.dto';
 import { SuperlikeUsers } from './interfaces/superlike-users.interfaces';
@@ -16,6 +18,10 @@ export class SuperlikeUsersService {
     private readonly likeUserModel: Model<LikeUsers>,
     @InjectModel('SuperlikeStar')
     private readonly superlikeStarModel: Model<SuperlikeStar>,
+    @InjectModel('Matches')
+    private readonly matchesModel: Model<Matches>,
+    @InjectModel('User')
+    private readonly userModel: Model<User>,
   ) {}
   async create(createSuperlikeUserDto: CreateSuperlikeUserDto, user) {
     const userId = user._id.toString();
@@ -46,14 +52,33 @@ export class SuperlikeUsersService {
         userSuperlikedId: userId,
       });
       isMatched = false;
+      let userName = '';
+      let userAvatar = '';
+      let otherUserAvatar = '';
       if (likeMatched || superlikeMatched) {
         isMatched = true;
+        await this.matchesModel.create({
+          userId: userId,
+          otherUserId: createSuperlikeUserDto.userSuperlikedId,
+        });
+        const user = await this.userModel.findOne({
+          _id: userId,
+        });
+        const otherUser = await this.userModel.findOne({
+          _id: createSuperlikeUserDto.userSuperlikedId,
+        });
+        userAvatar = user.avatar;
+        otherUserAvatar = otherUser.avatar;
+        userName = otherUser.name;
       }
       return {
         userId: superlike.userId,
         userLikedId: superlike.userSuperlikedId,
         _id: superlike._id,
         isMatched: isMatched,
+        userName: userName,
+        userAvatar: userAvatar,
+        otherUserAvatar: otherUserAvatar,
       };
     } else {
       throw new HttpException(

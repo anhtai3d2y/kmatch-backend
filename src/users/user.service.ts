@@ -26,6 +26,7 @@ import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.inte
 import { Boots } from 'src/boots/interfaces/boots.interfaces';
 import { Role } from 'utils/constants/enum/role.enum';
 import { filter } from 'rxjs';
+import { Cron } from '@nestjs/schedule';
 
 export class UserService {
   constructor(
@@ -203,15 +204,9 @@ export class UserService {
     return this.pagingService.controlPaging(users, filter);
   }
 
-  async getUsersRanking(paging, user): Promise<User | any> {
+  async getUsersRanking(paging, userRequest): Promise<User | any> {
     const currentYear = new Date().getFullYear();
     let users = await this.userModel.aggregate([
-      {
-        $match: {
-          _id: { $ne: user._id },
-        },
-      },
-
       { $addFields: { userId: { $toString: '$_id' } } },
       {
         $lookup: {
@@ -257,10 +252,11 @@ export class UserService {
       const age = currentYear - parseInt(user.birthday.split('/')[0]);
       user.age = age;
       user.boots = user.boots - Date.now() < 0 ? 0 : user.boots - Date.now();
-      if (paging.sortBy === '{"superlikeStar": -1}') {
-        return user.superlikeStar > 0;
-      } else {
+      user.isMe = user._id.toString() === userRequest._id.toString();
+      if (paging.sortBy === '{"superlikes": -1, "superlikeStar": -1}') {
         return user.superlikes > 0;
+      } else {
+        return user.superlikeStar > 0;
       }
     });
     paging.limit = 100;
@@ -284,6 +280,10 @@ export class UserService {
         publicId: fileUploaded.public_id,
         secureURL: fileUploaded.secure_url,
       },
+      genderShow: 'Both',
+      minAge: 16,
+      maxAge: 30,
+      distance: 100,
       mylocation: {
         latitude: parseFloat(payload.latitude),
         longitude: parseFloat(payload.longitude),
@@ -361,6 +361,10 @@ export class UserService {
         },
         phonenumber: phonenumberPicked,
         boots: Date.now() + bootsPicked,
+        genderShow: 'Both',
+        minAge: 16,
+        maxAge: 30,
+        distance: 100,
       };
       const data = await this.userModel.create(user);
       await this.bootsModel.create({
@@ -421,24 +425,39 @@ export class UserService {
     if (userInfo.email) {
       updatedata.email = userInfo.email;
     }
-    if (userInfo.password) {
-      const salt = await Bcrypt.genSalt(10);
-      updatedata.password = await Bcrypt.hash(userInfo.password, salt);
-    }
-    if (userInfo.role) {
-      updatedata.role = userInfo.role;
-    }
+    // if (userInfo.password) {
+    //   const salt = await Bcrypt.genSalt(10);
+    //   updatedata.password = await Bcrypt.hash(userInfo.password, salt);
+    // }
+    // if (userInfo.role) {
+    //   updatedata.role = userInfo.role;
+    // }
     if (userInfo.phonenumber) {
       updatedata.phonenumber = userInfo.phonenumber;
     }
     if (userInfo.gender) {
       updatedata.gender = userInfo.gender;
     }
+    if (userInfo.birthday) {
+      updatedata.birthday = userInfo.birthday;
+    }
     if (userInfo.latitude) {
       updatedata.mylocation.latitude = userInfo.latitude;
     }
     if (userInfo.longitude) {
       updatedata.mylocation.longitude = userInfo.longitude;
+    }
+    if (userInfo.genderShow) {
+      updatedata.genderShow = userInfo.genderShow;
+    }
+    if (userInfo.minAge) {
+      updatedata.minAge = userInfo.minAge;
+    }
+    if (userInfo.maxAge) {
+      updatedata.maxAge = userInfo.maxAge;
+    }
+    if (userInfo.distance) {
+      updatedata.distance = userInfo.distance;
     }
     if (file) {
       if (updatedata.avatar.publicId) {
@@ -561,5 +580,150 @@ export class UserService {
 
     // Calculate the result.
     return c * r;
+  }
+
+  // @Cron('*/5 * * * * *')
+  @Cron('0 0 1 * *')
+  async cronJobFreeBoots() {
+    let plusUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlus,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    plusUsers = plusUsers.map((user) => user._id.toString());
+    const plusBoots = await this.bootsModel.find({
+      userId: { $in: plusUsers },
+    });
+    for (let i = 0; i < plusBoots.length; i++) {
+      plusBoots[i].amount = plusBoots[i].amount + 1;
+      await this.bootsModel.findByIdAndUpdate(plusBoots[i]._id, plusBoots[i]);
+    }
+
+    let goldUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchGold,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    goldUsers = goldUsers.map((user) => user._id.toString());
+    const goldBoots = await this.bootsModel.find({
+      userId: { $in: goldUsers },
+    });
+    for (let i = 0; i < goldBoots.length; i++) {
+      goldBoots[i].amount = goldBoots[i].amount + 3;
+      await this.bootsModel.findByIdAndUpdate(goldBoots[i]._id, goldBoots[i]);
+    }
+
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    const platinumBoots = await this.bootsModel.find({
+      userId: { $in: platinumUsers },
+    });
+    for (let i = 0; i < platinumBoots.length; i++) {
+      platinumBoots[i].amount = platinumBoots[i].amount + 5;
+      await this.bootsModel.findByIdAndUpdate(
+        platinumBoots[i]._id,
+        platinumBoots[i],
+      );
+    }
+  }
+
+  @Cron('0 0 * * 0')
+  async cronJobFreeStars() {
+    let plusUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlus,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    plusUsers = plusUsers.map((user) => user._id.toString());
+    const plusStars = await this.superlikeStarModel.find({
+      userId: { $in: plusUsers },
+    });
+    for (let i = 0; i < plusStars.length; i++) {
+      plusStars[i].amount = plusStars[i].amount + 1;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        plusStars[i]._id,
+        plusStars[i],
+      );
+    }
+
+    let goldUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchGold,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    goldUsers = goldUsers.map((user) => user._id.toString());
+    const goldStars = await this.superlikeStarModel.find({
+      userId: { $in: goldUsers },
+    });
+    for (let i = 0; i < goldStars.length; i++) {
+      goldStars[i].amount = goldStars[i].amount + 3;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        goldStars[i]._id,
+        goldStars[i],
+      );
+    }
+
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    const platinumStars = await this.superlikeStarModel.find({
+      userId: { $in: platinumUsers },
+    });
+    for (let i = 0; i < platinumStars.length; i++) {
+      platinumStars[i].amount = platinumStars[i].amount + 5;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        platinumStars[i]._id,
+        platinumStars[i],
+      );
+    }
   }
 }
