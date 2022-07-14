@@ -11,7 +11,6 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Gender } from 'utils/constants/enum/gender.enum';
-import { Role } from 'utils/constants/enum/role.enum';
 
 export class AddUserDto {
   @IsNotEmpty()

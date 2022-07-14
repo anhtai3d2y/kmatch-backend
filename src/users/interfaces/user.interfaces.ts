@@ -12,6 +12,11 @@ export interface User extends Document {
     longitude: number;
   };
   boots: number;
+  gender: string;
+  genderShow: string;
+  minAge: number;
+  maxAge: number;
+  distance: number;
   currentHashedRefreshToken: string;
   verification: {
     code: string;

@@ -279,6 +279,10 @@ export class UserService {
         publicId: fileUploaded.public_id,
         secureURL: fileUploaded.secure_url,
       },
+      genderShow: 'Both',
+      minAge: 16,
+      maxAge: 30,
+      distance: 100,
       mylocation: {
         latitude: parseFloat(payload.latitude),
         longitude: parseFloat(payload.longitude),
@@ -356,6 +360,10 @@ export class UserService {
         },
         phonenumber: phonenumberPicked,
         boots: Date.now() + bootsPicked,
+        genderShow: 'Both',
+        minAge: 16,
+        maxAge: 30,
+        distance: 100,
       };
       const data = await this.userModel.create(user);
       await this.bootsModel.create({
@@ -437,6 +445,18 @@ export class UserService {
     }
     if (userInfo.longitude) {
       updatedata.mylocation.longitude = userInfo.longitude;
+    }
+    if (userInfo.genderShow) {
+      updatedata.genderShow = userInfo.genderShow;
+    }
+    if (userInfo.minAge) {
+      updatedata.minAge = userInfo.minAge;
+    }
+    if (userInfo.maxAge) {
+      updatedata.maxAge = userInfo.maxAge;
+    }
+    if (userInfo.distance) {
+      updatedata.distance = userInfo.distance;
     }
     if (file) {
       if (updatedata.avatar.publicId) {

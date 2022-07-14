@@ -35,6 +35,10 @@ export const userSchema = new mongoose.Schema(
     },
     boots: Number,
     birthday: { type: String },
+    genderShow: String,
+    minAge: Number,
+    maxAge: Number,
+    distance: Number,
     currentHashedRefreshToken: String,
     verification: {
       code: { type: String },
