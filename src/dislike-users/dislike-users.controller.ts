@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Request,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import { DislikeUsersService } from './dislike-users.service';
 import { CreateDislikeUserDto } from './dto/create-dislike-user.dto';
@@ -15,6 +16,8 @@ import { Response } from 'utils/response';
 import { MessageErrorService } from 'src/message-error/message-error';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
+import { Permission } from 'common/decorators/roles.decorator';
+import { ActionEnum } from 'utils/constants/enum/action.enum';
 @ApiTags('dislike-users')
 @Controller('dislike-users')
 export class DislikeUsersController {
@@ -73,5 +76,26 @@ export class DislikeUsersController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.dislikeUsersService.findOne(id);
+  }
+
+  @Permission(ActionEnum.removeDislikedUser)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove disliked user' })
+  @Delete(':id')
+  async removeLikedUser(@Param('id') id: string, @Request() req) {
+    try {
+      const data: any = await this.dislikeUsersService.removeDislikedUser(
+        id,
+        req.user,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Remove successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 }

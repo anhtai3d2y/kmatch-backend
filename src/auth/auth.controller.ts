@@ -232,7 +232,6 @@ export class AuthController {
         data: data,
       };
     } catch (e) {
-      console.log(e);
       return this.messageError.messageErrorController(e);
     }
   }

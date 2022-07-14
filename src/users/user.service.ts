@@ -321,7 +321,7 @@ export class UserService {
       Other: [...nameMale, ...nameFemale],
     };
     const gender = ['Male', 'Female', 'Other'];
-    for (let i = 1792; i <= 10000; i++) {
+    for (let i = 1; i <= 1000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
         Math.floor(Math.random() * (2006 - 1992) + 1992) +

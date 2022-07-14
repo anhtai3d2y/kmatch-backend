@@ -7,6 +7,7 @@ import {
   HttpStatus,
   UseGuards,
   Request,
+  Delete,
 } from '@nestjs/common';
 import { LikeUsersService } from './like-users.service';
 import { CreateLikeUserDto } from './dto/create-like-user.dto';
@@ -17,6 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
 import { Permission } from 'common/decorators/roles.decorator';
 import { ActionEnum } from 'utils/constants/enum/action.enum';
+import { cp } from 'fs';
 @ApiTags('like-users')
 @Controller('like-users')
 export class LikeUsersController {
@@ -91,5 +93,47 @@ export class LikeUsersController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.likeUsersService.findOne(id);
+  }
+
+  @Permission(ActionEnum.removeLikedUser)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove liked user' })
+  @Delete(':id')
+  async removeLikedUser(@Param('id') id: string, @Request() req) {
+    try {
+      const data: any = await this.likeUsersService.removeLikedUser(
+        id,
+        req.user,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Remove successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @Permission(ActionEnum.removeUserLikeMe)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove user like me' })
+  @Delete('user-like-me/:id')
+  async removeUserLikeMe(@Param('id') id: string, @Request() req) {
+    try {
+      const data: any = await this.likeUsersService.removeUserLikeMe(
+        id,
+        req.user,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Remove successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
   }
 }

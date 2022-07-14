@@ -14,7 +14,25 @@ export class MatchesService {
     private readonly matchesModel: Model<Matches>,
   ) {}
   async create(createMatchDto: CreateMatchDto) {
-    const match = await this.matchesModel.create(createMatchDto);
+    let match = await this.matchesModel.findOne({
+      $or: [
+        {
+          $and: [
+            { userId: createMatchDto.userId },
+            { otherUserId: createMatchDto.otherUserId },
+          ],
+        },
+        {
+          $and: [
+            { userId: createMatchDto.otherUserId },
+            { otherUserId: createMatchDto.userId },
+          ],
+        },
+      ],
+    });
+    if (!match) {
+      match = await this.matchesModel.create(createMatchDto);
+    }
     return match;
   }
 
