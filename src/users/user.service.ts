@@ -26,6 +26,7 @@ import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.inte
 import { Boots } from 'src/boots/interfaces/boots.interfaces';
 import { Role } from 'utils/constants/enum/role.enum';
 import { filter } from 'rxjs';
+import { Cron } from '@nestjs/schedule';
 
 export class UserService {
   constructor(
@@ -579,5 +580,150 @@ export class UserService {
 
     // Calculate the result.
     return c * r;
+  }
+
+  // @Cron('*/5 * * * * *')
+  @Cron('0 0 1 * *')
+  async cronJobFreeBoots() {
+    let plusUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlus,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    plusUsers = plusUsers.map((user) => user._id.toString());
+    const plusBoots = await this.bootsModel.find({
+      userId: { $in: plusUsers },
+    });
+    for (let i = 0; i < plusBoots.length; i++) {
+      plusBoots[i].amount = plusBoots[i].amount + 1;
+      await this.bootsModel.findByIdAndUpdate(plusBoots[i]._id, plusBoots[i]);
+    }
+
+    let goldUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchGold,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    goldUsers = goldUsers.map((user) => user._id.toString());
+    const goldBoots = await this.bootsModel.find({
+      userId: { $in: goldUsers },
+    });
+    for (let i = 0; i < goldBoots.length; i++) {
+      goldBoots[i].amount = goldBoots[i].amount + 3;
+      await this.bootsModel.findByIdAndUpdate(goldBoots[i]._id, goldBoots[i]);
+    }
+
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    const platinumBoots = await this.bootsModel.find({
+      userId: { $in: platinumUsers },
+    });
+    for (let i = 0; i < platinumBoots.length; i++) {
+      platinumBoots[i].amount = platinumBoots[i].amount + 5;
+      await this.bootsModel.findByIdAndUpdate(
+        platinumBoots[i]._id,
+        platinumBoots[i],
+      );
+    }
+  }
+
+  @Cron('0 0 * * 0')
+  async cronJobFreeStars() {
+    let plusUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlus,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    plusUsers = plusUsers.map((user) => user._id.toString());
+    const plusStars = await this.superlikeStarModel.find({
+      userId: { $in: plusUsers },
+    });
+    for (let i = 0; i < plusStars.length; i++) {
+      plusStars[i].amount = plusStars[i].amount + 1;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        plusStars[i]._id,
+        plusStars[i],
+      );
+    }
+
+    let goldUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchGold,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    goldUsers = goldUsers.map((user) => user._id.toString());
+    const goldStars = await this.superlikeStarModel.find({
+      userId: { $in: goldUsers },
+    });
+    for (let i = 0; i < goldStars.length; i++) {
+      goldStars[i].amount = goldStars[i].amount + 3;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        goldStars[i]._id,
+        goldStars[i],
+      );
+    }
+
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    const platinumStars = await this.superlikeStarModel.find({
+      userId: { $in: platinumUsers },
+    });
+    for (let i = 0; i < platinumStars.length; i++) {
+      platinumStars[i].amount = platinumStars[i].amount + 5;
+      await this.superlikeStarModel.findByIdAndUpdate(
+        platinumStars[i]._id,
+        platinumStars[i],
+      );
+    }
   }
 }
