@@ -7,4 +7,5 @@ export interface Paypal extends Document {
   token: string;
   PayerID: string;
   isCompleted: boolean;
+  createdAt: string;
 }

@@ -10,6 +10,7 @@ import { Boots } from 'src/boots/interfaces/boots.interfaces';
 import { SuperlikeStar } from 'src/superlike-star/interfaces/superlike-star.interfaces';
 import { User } from 'src/users/interfaces/user.interfaces';
 import { PackageType } from 'utils/constants/enum/packageType.enum';
+import { formatDate } from 'utils/util';
 import { CreatePaypalDto } from './dto/create-paypal.dto';
 import { Paypal } from './interfaces/paypal.interfaces';
 
@@ -95,10 +96,17 @@ export class PaypalService {
   }
 
   async getPaymentHistory(user) {
-    const data = await this.paypalModel.find({
-      userId: user._id,
-      isCompleted: true,
-    });
+    const data = await this.paypalModel.aggregate([
+      {
+        $match: {
+          userId: user._id.toString(),
+          isCompleted: true,
+        },
+      },
+    ]);
+    for (let i = 0; i < data.length; i++) {
+      data[i].time = formatDate(data[i].createdAt);
+    }
     return data;
   }
   async paymentSuccess(query) {

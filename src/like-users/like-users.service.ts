@@ -113,6 +113,48 @@ export class LikeUsersService {
     return like;
   }
 
+  async findUserLikeMe(user) {
+    const userId = user._id.toString();
+    const like = await this.likeUserModel.aggregate([
+      { $match: { userLikedId: userId } },
+      {
+        $addFields: {
+          userLikedId: { $toObjectId: '$userId' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userLikedId',
+          foreignField: '_id',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                avatar: 1,
+                gender: 1,
+                birthday: 1,
+              },
+            },
+          ],
+          as: 'user',
+        },
+      },
+      {
+        $unwind: '$user',
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ]);
+    for (let i = 0; i < like.length; i++) {
+      like[i].user.age = calculateAge(like[i].user.birthday);
+    }
+    return like;
+  }
+
   async findOne(id: string) {
     const like = await this.likeUserModel.findOne({
       _id: id,

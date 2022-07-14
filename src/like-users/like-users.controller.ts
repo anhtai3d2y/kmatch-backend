@@ -15,6 +15,8 @@ import { Response } from 'utils/response';
 import { MessageErrorService } from 'src/message-error/message-error';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'common/guard/roles.guard';
+import { Permission } from 'common/decorators/roles.decorator';
+import { ActionEnum } from 'utils/constants/enum/action.enum';
 @ApiTags('like-users')
 @Controller('like-users')
 export class LikeUsersController {
@@ -58,6 +60,24 @@ export class LikeUsersController {
   async findAll(@Request() req): Promise<Response> {
     try {
       const data: any = await this.likeUsersService.findAll(req.user);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Get successfully',
+        data: data,
+      };
+    } catch (e) {
+      return this.messageError.messageErrorController(e);
+    }
+  }
+
+  @Permission(ActionEnum.getUserLikeMe)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get likes' })
+  @Get('/see-who-like-me')
+  async findUserLikeMe(@Request() req): Promise<Response> {
+    try {
+      const data: any = await this.likeUsersService.findUserLikeMe(req.user);
       return {
         statusCode: HttpStatus.OK,
         message: 'Get successfully',
