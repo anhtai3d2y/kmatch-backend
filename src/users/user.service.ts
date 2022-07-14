@@ -726,4 +726,26 @@ export class UserService {
       );
     }
   }
+
+  // @Cron('*/5 * * * * *')
+  @Cron('0 0 1 * *')
+  async cronJobRemoveNopeList() {
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    console.log(platinumUsers);
+    await this.dislikeUserModel.deleteMany({
+      userDislikedId: { $in: platinumUsers },
+    });
+  }
 }
