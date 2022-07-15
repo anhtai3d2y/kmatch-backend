@@ -49,6 +49,9 @@ export class ThreadsService {
         },
       },
       {
+        $sort: { createdAt: -1 },
+      },
+      {
         $lookup: {
           from: 'users',
           localField: 'userId',
@@ -107,6 +110,9 @@ export class ThreadsService {
         $addFields: {
           messages: { $first: '$messages' },
         },
+      },
+      {
+        $sort: { 'messages.createdAt': -1 },
       },
     ]);
     for (let i = 0; i < thread.length; i++) {
