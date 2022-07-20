@@ -127,6 +127,9 @@ export class ThreadsService {
       thread[i].timeCreated = formatDate(thread[i].createdAt);
       if (thread[i].messages) {
         thread[i].messages.time = formatDate(thread[i].messages.createdAt);
+        if (thread[i].messages.messageType === 'Image') {
+          thread[i].messages.messageBody = 'Send an image';
+        }
         if (thread[i].user._id.toString() === thread[i].messages.senderId) {
           thread[
             i

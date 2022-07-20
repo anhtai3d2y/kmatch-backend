@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { formatDate } from 'utils/util';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { formatDate, uuid } from 'utils/util';
+import {
+  CreateMessageDto,
+  CreateMessageImageDto,
+} from './dto/create-message.dto';
 import { FilterMessageDto } from './dto/filter-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
 import { Messages } from './interfaces/messages.interfaces';
-
+import * as fs from 'fs';
+import { deleteFile, uploadFile } from 'utils/cloudinary';
 @Injectable()
 export class MessagesService {
   constructor(
@@ -21,6 +24,28 @@ export class MessagesService {
       receiverId: createMessageDto.receiverId,
       messageType: createMessageDto.messageType,
       messageBody: createMessageDto.messageBody,
+    });
+    return message;
+  }
+
+  async createImageMessage(
+    createMessageImageDto: CreateMessageImageDto,
+    file: any,
+    user,
+  ) {
+    const fileName = `./images/${uuid()}.png`;
+    await fs.createWriteStream(fileName).write(file.buffer);
+    const fileUploaded = await uploadFile(fileName);
+    fs.unlink(fileName, (err) => {
+      if (err) console.log('err: ', err);
+    });
+    const userId = user._id.toString();
+    const message = await this.messagesModel.create({
+      threadId: createMessageImageDto.threadId,
+      senderId: userId,
+      receiverId: createMessageImageDto.receiverId,
+      messageType: createMessageImageDto.messageType,
+      messageBody: fileUploaded.secure_url,
     });
     return message;
   }
