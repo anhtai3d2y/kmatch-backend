@@ -12,10 +12,28 @@ export class ThreadsService {
     private readonly threadsModel: Model<Threads>,
   ) {}
   async create(createThreadDto: CreateThreadDto, user: any) {
-    const thread = await this.threadsModel.create({
-      userId: user._id,
-      otherUserId: createThreadDto.otherUserId,
+    let thread = await this.threadsModel.findOne({
+      $or: [
+        {
+          $and: [
+            { userId: user._id },
+            { otherUserId: createThreadDto.otherUserId },
+          ],
+        },
+        {
+          $and: [
+            { userId: createThreadDto.otherUserId },
+            { otherUserId: user._id },
+          ],
+        },
+      ],
     });
+    if (!thread) {
+      thread = await this.threadsModel.create({
+        userId: user._id,
+        otherUserId: createThreadDto.otherUserId,
+      });
+    }
     return thread;
   }
 
@@ -29,6 +47,9 @@ export class ThreadsService {
           otherUserId: { $toObjectId: '$otherUserId' },
           threadId: { $toString: '$_id' },
         },
+      },
+      {
+        $sort: { createdAt: -1 },
       },
       {
         $lookup: {
@@ -89,6 +110,9 @@ export class ThreadsService {
         $addFields: {
           messages: { $first: '$messages' },
         },
+      },
+      {
+        $sort: { 'messages.createdAt': -1 },
       },
     ]);
     for (let i = 0; i < thread.length; i++) {

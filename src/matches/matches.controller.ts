@@ -35,6 +35,7 @@ export class MatchesController {
   @Post()
   async create(@Body() createMatchDto: CreateMatchDto): Promise<Response> {
     try {
+      console.log(createMatchDto);
       const data: any = await this.matchesService.create(createMatchDto);
       return {
         statusCode: HttpStatus.OK,

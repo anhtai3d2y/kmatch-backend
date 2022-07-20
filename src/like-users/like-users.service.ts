@@ -161,4 +161,20 @@ export class LikeUsersService {
     });
     return like;
   }
+
+  async removeLikedUser(userLikedId: string, user) {
+    const like = await this.likeUserModel.findOneAndDelete({
+      userId: user._id.toString(),
+      userLikedId: userLikedId,
+    });
+    return like;
+  }
+
+  async removeUserLikeMe(userId: string, user) {
+    const like = await this.likeUserModel.findOneAndDelete({
+      userId: userId,
+      userLikedId: user._id.toString(),
+    });
+    return like;
+  }
 }

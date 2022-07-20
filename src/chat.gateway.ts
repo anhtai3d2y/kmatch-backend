@@ -23,4 +23,10 @@ export class ChatGateway {
     this.server.emit(data.emitId, data.message);
     return data;
   }
+
+  @SubscribeMessage('matches')
+  handleMatches(client: Socket, data) {
+    this.server.emit(data.emitId, data.message);
+    return data;
+  }
 }

@@ -74,4 +74,12 @@ export class DislikeUsersService {
     });
     return dislike;
   }
+
+  async removeDislikedUser(userDislikedId: string, user) {
+    const like = await this.dislikeUserModel.findOneAndDelete({
+      userId: user._id.toString(),
+      userDislikedId: userDislikedId,
+    });
+    return like;
+  }
 }

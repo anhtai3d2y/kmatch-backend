@@ -321,7 +321,7 @@ export class UserService {
       Other: [...nameMale, ...nameFemale],
     };
     const gender = ['Male', 'Female', 'Other'];
-    for (let i = 1792; i <= 10000; i++) {
+    for (let i = 1; i <= 1000; i++) {
       const genderPicked = gender[Math.floor(Math.random() * gender.length)];
       const birthdayPicked =
         Math.floor(Math.random() * (2006 - 1992) + 1992) +
@@ -725,5 +725,27 @@ export class UserService {
         platinumStars[i],
       );
     }
+  }
+
+  // @Cron('*/5 * * * * *')
+  @Cron('0 0 1 * *')
+  async cronJobRemoveNopeList() {
+    let platinumUsers = await this.userModel.aggregate([
+      {
+        $match: {
+          role: Role.KmatchPlatinum,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+        },
+      },
+    ]);
+    platinumUsers = platinumUsers.map((user) => user._id.toString());
+    console.log(platinumUsers);
+    await this.dislikeUserModel.deleteMany({
+      userDislikedId: { $in: platinumUsers },
+    });
   }
 }
