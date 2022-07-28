@@ -1,1 +1,1 @@
-node:web src/maim.ts
+node:web src/main.ts
