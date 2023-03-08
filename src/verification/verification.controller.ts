@@ -62,6 +62,7 @@ export class VerificationController {
         data: data,
       };
     } catch (e) {
+      console.log(e);
       return this.messageError.messageErrorController(e);
     }
   }

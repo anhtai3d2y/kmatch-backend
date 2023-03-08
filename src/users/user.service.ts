@@ -500,6 +500,87 @@ export class UserService {
       }
     }
   }
+
+  async updateUserNewsFeed(user, userInfo: UpdateUserDto): Promise<User> {
+    const updatedata: any = await this.userModel.findById(user._id);
+    if (!updatedata) {
+      throw new HttpException(
+        {
+          error: 'ID_NOT_FOUND',
+          message: 'common.ID_NOT_FOUND',
+          statusCode: HttpStatus.NOT_FOUND,
+        },
+        404,
+      );
+    }
+
+    if (userInfo.name) {
+      updatedata.name = userInfo.name;
+    }
+
+    if (userInfo.email) {
+      updatedata.email = userInfo.email;
+    }
+    // if (userInfo.password) {
+    //   const salt = await Bcrypt.genSalt(10);
+    //   updatedata.password = await Bcrypt.hash(userInfo.password, salt);
+    // }
+    // if (userInfo.role) {
+    //   updatedata.role = userInfo.role;
+    // }
+    if (userInfo.phonenumber) {
+      updatedata.phonenumber = userInfo.phonenumber;
+    }
+    if (userInfo.gender) {
+      updatedata.gender = userInfo.gender;
+    }
+    if (userInfo.birthday) {
+      updatedata.birthday = userInfo.birthday;
+    }
+    if (userInfo.latitude) {
+      updatedata.mylocation.latitude = userInfo.latitude;
+    }
+    if (userInfo.longitude) {
+      updatedata.mylocation.longitude = userInfo.longitude;
+    }
+    if (userInfo.genderShow) {
+      updatedata.genderShow = userInfo.genderShow;
+    }
+    if (userInfo.minAge) {
+      updatedata.minAge = userInfo.minAge;
+    }
+    if (userInfo.maxAge) {
+      updatedata.maxAge = userInfo.maxAge;
+    }
+    if (userInfo.distance) {
+      updatedata.distance = userInfo.distance;
+    }
+
+    try {
+      const data = await this.userModel.findByIdAndUpdate(user._id, updatedata);
+      return data;
+    } catch (e) {
+      if (e.name === 'MongoError') {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.CONFLICT,
+            message: 'common.CONFLICT',
+            error: 'Conflict',
+          },
+          409,
+        );
+      } else {
+        throw new HttpException(
+          {
+            error: 'ID_NOT_FOUND',
+            message: 'common.ID_NOT_FOUND',
+            statusCode: HttpStatus.NOT_FOUND,
+          },
+          404,
+        );
+      }
+    }
+  }
   async setCurrentRefreshToken(refreshToken: string, userId: string) {
     const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userModel.findByIdAndUpdate(userId, {

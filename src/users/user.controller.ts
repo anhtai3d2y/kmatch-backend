@@ -209,4 +209,31 @@ export class UserController {
       return e;
     }
   }
+
+  @Put('/setting-newsfeed')
+  @ApiOperation({ summary: 'Update user' })
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @ApiBody({
+    type: UpdateUserDto,
+    description: 'Update user',
+  })
+  async updateUserNewsFeed(
+    @Request() req,
+    @Body() payload: UpdateUserDto,
+  ): Promise<Response> {
+    try {
+      const result = await this.userService.updateUserNewsFeed(
+        req.user,
+        payload,
+      );
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Update user successfully!',
+        data: result,
+      };
+    } catch (e) {
+      return e;
+    }
+  }
 }

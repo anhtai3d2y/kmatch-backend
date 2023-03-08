@@ -130,11 +130,11 @@ export class ThreadsService {
         if (thread[i].messages.messageType === 'Image') {
           thread[i].messages.messageBody = 'Send an image';
         }
-        if (thread[i].user._id.toString() === thread[i].messages.senderId) {
-          thread[
-            i
-          ].messages.messageBody = `You: ${thread[i].messages.messageBody}`;
-        }
+        // if (thread[i].user._id.toString() === thread[i].messages.senderId) {
+        //   thread[
+        //     i
+        //   ].messages.messageBody = `You: ${thread[i].messages.messageBody}`;
+        // }
       } else {
         thread[i].messages = {
           messageType: 'Text',

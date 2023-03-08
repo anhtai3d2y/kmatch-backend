@@ -16,7 +16,7 @@ export class SendMailService {
       .sendMail({
         to: email,
         subject: 'Password reset confirmation code ✔',
-        template: './index', // The `.pug` or `.hbs` extension is appended automatically.
+        template: '/index', // The `.pug` or `.hbs` extension is appended automatically.
         context: {
           // Data to be sent to template engine.
           code: code,
@@ -37,7 +37,7 @@ export class SendMailService {
         .sendMail({
           to: data?.email,
           subject: 'Your account has been created ✔',
-          template: './user', // The `.pug` or `.hbs` extension is appended automatically.
+          template: '/user', // The `.pug` or `.hbs` extension is appended automatically.
           context: {
             // Data to be sent to template engine.
             password: data?.password,
@@ -65,7 +65,7 @@ export class SendMailService {
         .sendMail({
           to: email,
           subject: 'Register confirmation code ✔',
-          template: './register', // The `.pug` or `.hbs` extension is appended automatically.
+          template: '/register', // The `.pug` or `.hbs` extension is appended automatically.
           context: {
             // Data to be sent to template engine.
             code: code,
@@ -94,9 +94,14 @@ export class SendMailService {
     if (data !== null) {
       try {
         const code = await randomInt(100000, 999999);
+        const salt = await Bcrypt.genSalt(10);
+        const verificationCode = await Bcrypt.hash(code.toString(), salt);
         await data.updateOne(
           {
-            verification: { code: `${code}`, timeOut: Date.now() + 300000 },
+            verification: {
+              code: `${verificationCode}`,
+              timeOut: Date.now() + 300000,
+            },
           },
           {
             new: true,
@@ -106,7 +111,7 @@ export class SendMailService {
             .sendMail({
               to: data.email,
               subject: 'Password reset confirmation code ✔',
-              template: './index', // The `.pug` or `.hbs` extension is appended automatically.
+              template: '/index', // The `.pug` or `.hbs` extension is appended automatically.
               context: {
                 // Data to be sent to template engine.
                 code: code,
@@ -132,10 +137,11 @@ export class SendMailService {
 
   async resetPass(data, resetPass) {
     if (data !== null) {
-      if (
-        resetPass.verificationCode === data.verification.code &&
-        Date.now() <= data.verification.timeOut
-      ) {
+      const verificationCodeCheck = await Bcrypt.compare(
+        resetPass.verificationCode,
+        data.verification.code,
+      );
+      if (verificationCodeCheck && Date.now() <= data.verification.timeOut) {
         if (resetPass.newPassword === resetPass.confirmNewPassword) {
           const newPass = await Bcrypt.hash(
             resetPass.newPassword,

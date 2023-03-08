@@ -7,6 +7,7 @@ import { User } from 'src/users/interfaces/user.interfaces';
 import { CreateVerificationDto } from './dto/create-verification.dto';
 import { GetVerificationDto } from './dto/get-verification.dto';
 import { Veritification } from './interfaces/verification.interfaces';
+import * as Bcrypt from 'bcryptjs';
 
 @Injectable()
 export class VerificationService {
@@ -42,10 +43,15 @@ export class VerificationService {
       await this.verificationModel.deleteOne({
         email: createVerificationDto.email,
       });
+      const salt = await Bcrypt.genSalt(10);
+      const verificationCode = await Bcrypt.hash(
+        code.verificationCode.toString(),
+        salt,
+      );
       await this.verificationModel.create({
         email: createVerificationDto.email,
         verification: {
-          code: `${code.verificationCode}`,
+          code: `${verificationCode}`,
           timeOut: Date.now() + 1800000,
         },
       });
@@ -58,9 +64,12 @@ export class VerificationService {
       email: getVerificationDto.email,
     });
     if (verification) {
+      const verificationCodeCheck = await Bcrypt.compare(
+        getVerificationDto.verificationCode,
+        verification.verification.code,
+      );
       if (
-        getVerificationDto.verificationCode ===
-          verification.verification.code &&
+        verificationCodeCheck &&
         Date.now() <= verification.verification.timeOut
       ) {
         return await this.verificationModel.deleteOne({
